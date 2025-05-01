@@ -9,6 +9,7 @@ const UserInviters = () => {
   const { session } = useAuth();
   const [inviteUser, setInviteUser] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const acceptUserFetch = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -19,7 +20,7 @@ const UserInviters = () => {
     if (error) {
       console.error("Error fetching user data:", error.message);
     } else {
-      // console.log("inviter-dat", data);
+      console.log("inviter-dat", data);
       const { data: Inviter, error: InviterError } = await supabase
         .from("user-data")
         .select("*")
@@ -47,7 +48,7 @@ const UserInviters = () => {
       }
     }
   };
-  // console.log("inviteUser", inviteUser);
+  console.log("inviteUser", inviteUser);
 
   useEffect(() => {
     acceptUserFetch();
