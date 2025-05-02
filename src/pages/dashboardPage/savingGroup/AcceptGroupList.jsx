@@ -22,19 +22,13 @@ const AcceptGroupList = () => {
         return;
       }
 
-      // console.log("Group data:", groupData);
-
       if (groupData.length > 0) {
-        // Collect all unique user IDs
         const userIds = [
           ...new Set(
             groupData.flatMap((item) => [item.user_join, item.user_accept])
           ),
         ];
 
-        // console.log("All user IDs:", userIds);
-
-        // Fetch user profiles
         const { data: userData, error: userError } = await supabase
           .from("user-data")
           .select("*")
@@ -45,25 +39,20 @@ const AcceptGroupList = () => {
           return;
         }
 
-        // console.log("user-data", userData);
-
-        // Create a map for fast lookup
         const userMap = {};
         userData.forEach((user) => {
           userMap[user.user_id] = user;
         });
 
-        // Attach user data to each group
         const enrichedGroupData = groupData.map((group) => ({
           ...group,
           user_join_data: userMap[group.user_join] || null,
           user_accept_data: userMap[group.user_accept] || null,
         }));
-        // console.log(enrichedGroupData);
 
         setGroupData(enrichedGroupData);
-
-        // You can now use enrichedGroupData in your app
+      } else {
+        setGroupData([]);
       }
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -72,7 +61,34 @@ const AcceptGroupList = () => {
 
   useEffect(() => {
     groupFetchFunction();
-  }, []);
+
+    const channel = supabase
+      .channel("realtime-accept-groups")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "create-group",
+        },
+        (payload) => {
+          const row = payload.new || payload.old;
+          if (
+            row?.user_join === session.user.id ||
+            row?.user_accept === session.user.id
+          ) {
+            console.log("Realtime update triggered:", payload);
+            groupFetchFunction();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session.user.id]);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
       {/* Page Header */}
@@ -94,7 +110,7 @@ const AcceptGroupList = () => {
             rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 group hover:scale-[1.02]"
           >
             {/* User Join */}
-            <div className="flex items-center gap-4 w-[35%] ">
+            <div className="flex items-center gap-4 w-[35%]">
               <div className="size-24">
                 <SearchuserImage
                   userId={group.user_join_data?.user_id}
@@ -111,18 +127,15 @@ const AcceptGroupList = () => {
               </div>
             </div>
 
-            {/* Divider */}
-            {/* <div className="w-px h-10 bg-gray-700 hidden md:block"></div> */}
-
             {/* User Accept */}
-            <div className="flex items-center gap-4 w-[35%]  ">
+            <div className="flex items-center gap-4 w-[35%]">
               <div className="size-24">
                 <SearchuserImage
                   userId={group.user_accept_data?.user_id}
-                  addDesign="w-full h-full object-cover  rounded-full"
+                  addDesign="w-full h-full object-cover rounded-full"
                 />
               </div>
-              <div className="">
+              <div>
                 <p className="text-xs uppercase tracking-wider text-gray-400">
                   Accepted by
                 </p>
@@ -131,9 +144,11 @@ const AcceptGroupList = () => {
                 </p>
               </div>
             </div>
-            <div className="  h-full flex justify-center items-center">
+
+            {/* Action */}
+            <div className="h-full flex justify-center items-center">
               <Link to={`/saving-group/saving-detail`} state={group}>
-                <button className=" font-bold flex items-center justify-center gap-2 bg-gradient-to-b px-4 py-2 rounded-xl border-black border-2 cursor-pointer   h-10 from-yellow-300 via-yellow-600 to-yellow-800">
+                <button className="font-bold flex items-center justify-center gap-2 bg-gradient-to-b px-4 py-2 rounded-xl border-black border-2 cursor-pointer h-10 from-yellow-300 via-yellow-600 to-yellow-800">
                   <RiMoneyDollarCircleFill className="text-white text-2xl" />
                   <span>Daily Note</span>
                 </button>

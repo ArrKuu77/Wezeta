@@ -5,6 +5,7 @@ import { ImMenu } from "react-icons/im";
 import LogoSmall from "../../assets/logoSmall.png";
 import { useAuth } from "../../components/authComponent/context/AuthContext";
 import { GiRamProfile } from "react-icons/gi";
+import logo from "../../assets/logoAuth.png";
 const Navbar = () => {
   const {
     session,
@@ -83,7 +84,7 @@ const Navbar = () => {
                 alt="Profile"
               />
             ) : (
-              <GiRamProfile className=" w-7 h-7 text-yellow-500 " />
+              <img src={logo} alt="Profile" />
             )}
           </div>
           {emailShow && (

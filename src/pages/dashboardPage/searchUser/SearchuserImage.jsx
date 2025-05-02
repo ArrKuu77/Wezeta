@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../../../supabaseClient";
-import { GiRamProfile } from "react-icons/gi";
-
+import logo from "../../../assets/logoAuth.png";
 const SearchuserImage = ({ userId, addDesign = null }) => {
   const [photo, setPhoto] = useState(null);
 
@@ -36,7 +35,13 @@ const SearchuserImage = ({ userId, addDesign = null }) => {
           }`}
         />
       ) : (
-        <GiRamProfile className="w-full h-full overflow-hidden object-cover p-1 rounded-full border border-yellow-500" />
+        <img
+          className={`  overflow-hidden object-cover p-1   border border-yellow-500 ${
+            addDesign ? addDesign : "w-full h-[85px] rounded-full"
+          }`}
+          src={logo}
+          alt=""
+        />
       )}
     </div>
   );

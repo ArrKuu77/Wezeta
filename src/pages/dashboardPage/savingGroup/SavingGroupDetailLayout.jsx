@@ -25,10 +25,10 @@ const SavingGroupDetail = () => {
             </div>
             <div>
               <h2 className=" bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent">
-                {group.user_accept_data.user_name}
+                {group?.user_accept_data?.user_name}
               </h2>
               <h2 className=" bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent">
-                {group.user_join_data.user_name}
+                {group?.user_join_data?.user_name}
               </h2>
             </div>
           </div>

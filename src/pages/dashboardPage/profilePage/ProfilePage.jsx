@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../../components/authComponent/context/AuthContext";
-import { GiRamProfile } from "react-icons/gi";
+import logo from "../../../assets/logoAuth.png";
 import { BiEdit } from "react-icons/bi";
 import { HiCamera } from "react-icons/hi";
 import { data, Link } from "react-router-dom";
@@ -183,7 +183,11 @@ const ProfilePage = () => {
               className="object-cover w-60 h-60 border-2 border-yellow-500 rounded-2xl shadow-lg"
             />
           ) : (
-            <GiRamProfile className="w-60 h-60 border-2 border-yellow-500 rounded-2xl p-4 text-yellow-500 bg-black" />
+            <img
+              src={logo}
+              alt="Profile"
+              className="object-cover w-60 h-60 border-2 border-yellow-500 rounded-2xl shadow-lg"
+            />
           )}
 
           <input

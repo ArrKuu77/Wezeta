@@ -10,28 +10,65 @@ const SavingGroup = () => {
   const [groupData, setGroupData] = useState(null);
   const [selectedUser, setSelectedUser] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState(
+    new Date().toLocaleString("default", { month: "long" })
+  );
 
-  const now = new Date();
-  const monthName = now.toLocaleString("default", { month: "long" });
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const fetchGroupData = async () => {
+    const { data, error } = await supabase
+      .from("group_detail_create")
+      .select("*")
+      .eq("group_id", location.state.group_id)
+      .eq("group_month", selectedMonth)
+      .single();
+
+    if (error) {
+      setGroupData(null);
+      console.error("Error fetching group data:", error);
+    } else {
+      setGroupData(data);
+    }
+  };
 
   useEffect(() => {
-    const fetchGroupData = async () => {
-      const { data, error } = await supabase
-        .from("group_detail_create")
-        .select("*")
-        .eq("group_id", location.state.group_id)
-        .eq("group_month", monthName)
-        .single();
-
-      if (error) {
-        console.error("Error fetching group data:", error);
-      } else {
-        setGroupData(data);
-      }
-    };
-
     fetchGroupData();
-  }, []);
+
+    const channel = supabase
+      .channel("group_detail_realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "group_detail_create",
+          filter: `group_id=eq.${location.state.group_id}`,
+        },
+        (payload) => {
+          console.log("Realtime update received:", payload);
+          fetchGroupData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [location.state.group_id, selectedMonth]);
 
   const totalIncome = groupData?.group_member_income_data?.reduce(
     (sum, member) => sum + parseInt(member.member_income),
@@ -59,7 +96,24 @@ const SavingGroup = () => {
   );
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6 text-yellow-300  min-h-screen">
+    <div className="p-6 max-w-4xl mx-auto space-y-6 text-yellow-300 min-h-screen">
+      {/* Month Filter */}
+      <div className="form-control w-full max-w-xs">
+        <label className="label">
+          <span className="label-text text-yellow-300">Filter by Month</span>
+        </label>
+        <select
+          className="select select-bordered bg-black text-yellow-300"
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+        >
+          {months.map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
+        </select>
+      </div>
       {groupData ? (
         <>
           <h1 className="text-3xl font-bold text-center">
@@ -67,7 +121,7 @@ const SavingGroup = () => {
           </h1>
 
           {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 justify-between">
+          <div className="flex flex-col md:flex-row gap-4 justify-between flex-wrap">
             {/* User Filter */}
             <div className="form-control w-full max-w-xs">
               <label className="label">
@@ -153,7 +207,7 @@ const SavingGroup = () => {
             <div className="card-body">
               <h2 className="card-title">🧾 Member Expenses</h2>
               <div className="overflow-x-auto">
-                <table className="table  text-sm">
+                <table className="table text-sm">
                   <thead>
                     <tr>
                       <th>Name</th>
@@ -185,12 +239,12 @@ const SavingGroup = () => {
                         </td>
                       </tr>
                     )}
-                    <tr className="bg-gray-900 ">
-                      <td colSpan="6" className=" font-bold text-xl col-end-3">
+                    <tr className="bg-gray-900">
+                      <td colSpan="6" className="font-bold text-xl">
                         Total
                       </td>
                       <td>
-                        {parseInt(totalFilteredOutcome).toLocaleString()}MMK
+                        {parseInt(totalFilteredOutcome).toLocaleString()} MMK
                       </td>
                     </tr>
                   </tbody>
