@@ -1,6 +1,6 @@
 import SigninPage from "../pages/authPage/SigninPage";
 import SignupPage from "../pages/authPage/SignupPage";
-import AuthCallback from "../pages/authPage/AuthCallback"; // <-- import here
+import AuthCallback from "../components/authComponent/AuthCallback"; // <-- import here
 
 import AurhPreventRoute from "../components/authComponent/AurhPreventRoute";
 

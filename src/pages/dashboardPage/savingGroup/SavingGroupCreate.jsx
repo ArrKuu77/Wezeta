@@ -10,18 +10,26 @@ import AuthLableInput from "../../../components/authComponent/AuthLableInput";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../components/authComponent/context/AuthContext";
 import { supabase } from "../../../../supabaseClient";
+import { FaBowlFood } from "react-icons/fa6";
+import { GiHealthNormal } from "react-icons/gi";
+import { MdDirectionsCar } from "react-icons/md";
+import { IoIosBeer } from "react-icons/io";
 
 const SavingGroupCreate = () => {
   const categories = [
-    { icon: <IoFastFood size={32} />, label: "Food" },
+    { icon: <FaBowlFood size={32} />, label: "Food" },
     { icon: <FaBusAlt size={32} />, label: "YBS Bus" },
+    { icon: <IoFastFood size={32} />, label: " Snacks" },
+    { icon: <GiHealthNormal size={32} />, label: " Medical" },
+    { icon: <MdDirectionsCar size={32} />, label: " Car" },
+    { icon: <MdShoppingCart size={32} />, label: "Shopping" },
+    { icon: <IoHome size={32} />, label: "HomePayment" },
     { icon: <IoShirt size={32} />, label: "Shirt for Men" },
     { icon: <GiPoloShirt size={32} />, label: "Shirt for Women" },
     { icon: <PiPants size={32} />, label: "Pants for Men" },
     { icon: <PiPantsFill size={32} />, label: "Pants for Women" },
-    { icon: <MdShoppingCart size={32} />, label: "Shopping" },
-    { icon: <IoHome size={32} />, label: "HomePayment" },
     { icon: <TiWiFi size={32} />, label: "WifiPayment" },
+    { icon: <IoIosBeer size={32} />, label: "Bar" },
     { icon: <PiPhoneCallFill size={32} />, label: "PhonePayment" },
   ];
 
@@ -225,7 +233,7 @@ const SavingGroupCreate = () => {
   };
 
   return (
-    <div className="p-4 min-h-screen flex items-center justify-center bg-gray-950">
+    <div className="p-4  flex items-center justify-center bg-gray-950">
       <div className="w-full max-w-xl">
         {step > 1 ? (
           <button
