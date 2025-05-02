@@ -1,15 +1,15 @@
-import { lazy, Suspense } from "react";
-
 import SigninPage from "../pages/authPage/SigninPage";
-
 import SignupPage from "../pages/authPage/SignupPage";
+import AuthCallback from "../pages/authPage/AuthCallback"; // <-- import here
+
 import AurhPreventRoute from "../components/authComponent/AurhPreventRoute";
+
 const authRoute = [
   {
     path: "/signin",
     element: (
       <AurhPreventRoute>
-        <SigninPage />,
+        <SigninPage />
       </AurhPreventRoute>
     ),
   },
@@ -20,6 +20,10 @@ const authRoute = [
         <SignupPage />
       </AurhPreventRoute>
     ),
+  },
+  {
+    path: "/auth/callback", // <-- add route for Google OAuth callback
+    element: <AuthCallback />,
   },
 ];
 

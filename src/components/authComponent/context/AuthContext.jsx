@@ -8,30 +8,75 @@ export const AuthContextProvider = ({ children }) => {
   const [photo, setPhoto] = useState(null);
   const [googlePhoto, setGooglePhoto] = useState(null);
 
+  // 📦 Load profile image from Supabase Storage
   const getMedia = async (userId) => {
     const { data, error } = await supabase.storage
       .from("user-photo")
-      .list(userId + "/", {
+      .list(`${userId}/`, {
         limit: 1,
-        offset: 0,
         sortBy: { column: "created_at", order: "desc" },
       });
-    if (data) {
-      // console.log(data);
-      setPhoto(data);
-    } else {
-      // console.log("getMedia", error);
-    }
+
+    if (data) setPhoto(data);
+    else console.warn("Storage fetch error:", error);
   };
 
-  const getURL = () => {
-    let url =
-      import.meta.env.VITE_SITE_URL ??
-      window?.location?.origin ??
-      "http://localhost:3000";
+  // 🟢 Init session + listener
+  useEffect(() => {
+    const loadSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
 
-    // Ensure protocol and trailing slash
-    url = url.startsWith("http") ? url : `https://${url}`;
+    loadSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => authListener.subscription.unsubscribe();
+  }, []);
+
+  // 🔁 Optional: Track new OAuth users and add profile to 'user-data'
+  useEffect(() => {
+    const checkAndInsertUser = async () => {
+      if (!session?.user || localStorage.getItem("profileCreated")) return;
+
+      const user = session.user;
+
+      const { data: existingUser, error: fetchError } = await supabase
+        .from("user-data")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!existingUser && !fetchError) {
+        const { data: insertedUser, error: insertError } = await supabase
+          .from("user-data")
+          .insert({
+            user_name: user.user_metadata?.full_name,
+            user_email: user.email,
+            user_id: user.id,
+          })
+          .select()
+          .single();
+
+        if (insertedUser) {
+          localStorage.setItem("profileCreated", "true");
+          alert("Welcome! Your profile was created.");
+        } else {
+          console.error("Insert error:", insertError);
+        }
+      }
+    };
+
+    checkAndInsertUser();
+  }, [session]);
+
+  const getURL = () => {
+    let url = import.meta.env.VITE_SITE_URL || window.location.origin;
     return url.endsWith("/") ? url : `${url}/`;
   };
 
@@ -42,49 +87,9 @@ export const AuthContextProvider = ({ children }) => {
         password,
       });
 
-      // console.log(data, error);
+      if (error) return { success: false, error: error.message };
 
-      if (!error) {
-        const { user } = data;
-
-        // 🔍 Step 1: Check if user already exists
-        const { data: existingUser, error: fetchError } = await supabase
-          .from("user-data")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        // ⚠️ Handle fetch error (ignore 406 because it means "not found")
-        if (fetchError && fetchError.code !== "PGRST116") {
-          console.error("Error checking user existence:", fetchError);
-          return { success: false, error: fetchError };
-        }
-
-        // ✅ If not found, insert new user
-        if (!existingUser) {
-          const { data: insertedUser, error: insertError } = await supabase
-            .from("user-data")
-            .insert({
-              user_name: user.user_metadata.full_name,
-              user_email: user.email,
-              user_id: user.id,
-            })
-            .select()
-            .single();
-
-          if (insertedUser) {
-            console.log("User data inserted successfully:", insertedUser);
-            alert("User data inserted successfully");
-          } else {
-            console.error("Error inserting user data:", insertError);
-            alert("Error inserting user data");
-          }
-        }
-
-        return { success: true, data: data };
-      } else {
-        return { success: false, error: error.message };
-      }
+      return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -96,77 +101,30 @@ export const AuthContextProvider = ({ children }) => {
         email,
         password,
         options: {
-          data: { full_name: name, name: name },
+          data: { full_name: name, name },
         },
       });
 
-      // console.log(data, error);
+      if (error) return { success: false, error: error.message };
 
-      if (!error) {
-        const { user } = data;
-
-        // 🔍 Step 1: Check if user already exists
-        const { data: existingUser, error: fetchError } = await supabase
-          .from("user-data")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        // ⚠️ Handle fetch error (ignore 406 because it means "not found")
-        if (fetchError && fetchError.code !== "PGRST116") {
-          console.error("Error checking user existence:", fetchError);
-          return { success: false, error: fetchError };
-        }
-
-        // ✅ If not found, insert new user
-        if (!existingUser) {
-          const { data: insertedUser, error: insertError } = await supabase
-            .from("user-data")
-            .insert({
-              user_name: user.user_metadata.full_name,
-              user_email: user.email,
-              user_id: user.id,
-            })
-            .select()
-            .single();
-
-          if (insertedUser) {
-            // console.log("User data inserted successfully:", insertedUser);
-            alert("User data inserted successfully");
-          } else {
-            console.error("Error inserting user data:", insertError);
-            alert("Error inserting user data");
-          }
-        }
-
-        return { success: true, data: data };
-      } else {
-        return { success: false, error: error.message };
-      }
+      return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
     }
   };
+
   const LoginWithGoogle = async () => {
     try {
-      const redirectUrl =
-        import.meta.env.VITE_SITE_URL?.replace(/\/$/, "") ||
-        window.location.origin;
-
+      const redirectTo = `${getURL()}auth/callback`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo: `${redirectUrl}/`,
-        },
+        options: { redirectTo },
       });
 
-      if (error) {
-        console.error("Google login error:", error.message);
-        alert("Failed to sign in with Google. Please try again.");
-      }
+      if (error) throw error;
     } catch (err) {
-      console.error("Unexpected error during Google login:", err);
-      alert("Something went wrong during Google sign-in.");
+      console.error("Google login failed:", err.message);
+      alert("Google login failed.");
     }
   };
 
@@ -175,105 +133,48 @@ export const AuthContextProvider = ({ children }) => {
     userChangeName,
     newPassword = null
   ) => {
-    const updatePayload = {
+    const payload = {
       data: {
-        avatar_url: userPhoto == undefined ? null : userPhoto,
-        picture: userPhoto == undefined ? null : userPhoto,
+        avatar_url: userPhoto || null,
+        picture: userPhoto || null,
         full_name: userChangeName,
         name: userChangeName,
       },
     };
 
-    if (newPassword) {
-      updatePayload.password = newPassword;
-    }
+    if (newPassword) payload.password = newPassword;
 
-    const { data, error } = await supabase.auth.updateUser(updatePayload);
-
-    if (error) {
-      return { success: false, error: error.message };
-    } else {
-      return { success: true, dataFet: data };
-    }
+    const { data, error } = await supabase.auth.updateUser(payload);
+    return error
+      ? { success: false, error: error.message }
+      : { success: true, data };
   };
 
   const LogoutUser = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      alert("Logout failed:", error.message);
+      alert("Logout failed: " + error.message);
     } else {
-      alert("User signed out");
-      // localStorage.removeItem("profilePhotoUPDExit");
-      // optionally redirect
-      // window.location.href = '/login';
+      alert("User signed out.");
+      localStorage.removeItem("profileCreated");
     }
   };
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      setSession(session);
-
-      if (session?.user) {
-        const user = session.user;
-
-        const { data: existingUser, error: fetchError } = await supabase
-          .from("user-data")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (!existingUser && !fetchError) {
-          const { data: insertedUser, error: insertError } = await supabase
-            .from("user-data")
-            .insert({
-              user_name: user.user_metadata.full_name,
-              user_email: user.email,
-              user_id: user.id,
-            })
-            .select()
-            .single();
-
-          if (insertedUser) {
-            localStorage.setItem("profileCreated", "true");
-            alert("Welcome! Your profile was created.");
-          }
-        }
-      }
-    };
-
-    // Only run if user hasn't already seen welcome
-    if (!localStorage.getItem("profileCreated")) {
-      checkSession();
-    }
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         session,
-        LogoutUser,
-        updateUserMetaPhoto,
-        googlePhoto,
-        setGooglePhoto,
+        setSession,
         photo,
         setPhoto,
+        googlePhoto,
+        setGooglePhoto,
         getMedia,
-        setSession,
         LoginUser,
         SignUpUser,
         LoginWithGoogle,
+        updateUserMetaPhoto,
+        LogoutUser,
       }}
     >
       {children}
@@ -281,6 +182,4 @@ export const AuthContextProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);
