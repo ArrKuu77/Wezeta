@@ -23,6 +23,18 @@ export const AuthContextProvider = ({ children }) => {
       // console.log("getMedia", error);
     }
   };
+
+  const getURL = () => {
+    let url =
+      import.meta.env.VITE_SITE_URL ??
+      window?.location?.origin ??
+      "http://localhost:3000";
+
+    // Ensure protocol and trailing slash
+    url = url.startsWith("http") ? url : `https://${url}`;
+    return url.endsWith("/") ? url : `${url}/`;
+  };
+
   const LoginUser = async (email, password) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -138,9 +150,9 @@ export const AuthContextProvider = ({ children }) => {
   const LoginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      // options: {
-      //   redirectTo: `${window.location.origin}`,
-      // },
+      options: {
+        redirectTo: getURL(),
+      },
     });
   };
 
