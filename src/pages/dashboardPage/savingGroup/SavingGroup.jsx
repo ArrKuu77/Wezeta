@@ -249,7 +249,7 @@ const SavingGroup = () => {
           <div className="card bg-neutral text-yellow-300 shadow-md">
             <div className="card-body">
               <h2 className="card-title">🧾 Member Expenses</h2>
-              <div className="overflow-x-auto max-h-[500px]">
+              <div className="overflow-x-auto max-h-[400px]">
                 <table className="table text-sm">
                   <thead className="sticky top-0 bg-neutral z-10">
                     <tr>
@@ -268,12 +268,7 @@ const SavingGroup = () => {
                         .slice()
                         .reverse()
                         .map((item, i) => (
-                          <tr
-                            key={i}
-                            className={
-                              i % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
-                            }
-                          >
+                          <tr key={i}>
                             <td>{item.UploadUserName}</td>
                             <td>{item.category}</td>
                             <td>{item.shopName}</td>
