@@ -148,12 +148,26 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
   const LoginWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: getURL(),
-      },
-    });
+    try {
+      const redirectUrl =
+        import.meta.env.VITE_SITE_URL?.replace(/\/$/, "") ||
+        window.location.origin;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${redirectUrl}/`,
+        },
+      });
+
+      if (error) {
+        console.error("Google login error:", error.message);
+        alert("Failed to sign in with Google. Please try again.");
+      }
+    } catch (err) {
+      console.error("Unexpected error during Google login:", err);
+      alert("Something went wrong during Google sign-in.");
+    }
   };
 
   const updateUserMetaPhoto = async (
