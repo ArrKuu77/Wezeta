@@ -6,7 +6,7 @@ import { FaNotesMedical } from "react-icons/fa6";
 const SavingGroupDetail = () => {
   const location = useLocation();
   const group = location.state;
-  console.log("group", group);
+  // console.log("group", group);
 
   return (
     <div className="   bg-gray-950  pt-4">
@@ -16,13 +16,23 @@ const SavingGroupDetail = () => {
             Saving Group Detail
           </h1>
         </div>
-        <div className="flex items-center justify-between  mt-4 w-[90%] mx-auto">
+        <div className="flex items-center justify-between flex-col md:flex-row gap-3 md:gap-0  p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 ">
           <div>
             <div>
               <h2 className="text-2xl font-bold  bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent">
                 Group member
               </h2>
             </div>
+            {group?.group_member_income_data?.map((member, index) => (
+              <div key={index} className="flex items-center gap-3 mt-2">
+                <span className="text-lg font-semibold text-yellow-500">
+                  Member{index + 1}:
+                </span>
+                <span className="text-lg font-semibold text-yellow-300">
+                  {member.member_name}
+                </span>
+              </div>
+            ))}
             <div>
               <h2 className=" bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent">
                 {group?.user_accept_data?.user_name}

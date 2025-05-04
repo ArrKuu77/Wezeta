@@ -9,6 +9,7 @@ const UserInviters = () => {
   const { session } = useAuth();
   const [inviteUser, setInviteUser] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [acceptLoadingUserId, setAcceptLoadingUserId] = useState(null);
 
   const acceptUserFetch = async () => {
     setLoading(true);
@@ -47,6 +48,7 @@ const UserInviters = () => {
   };
 
   const handleAcceptFunction = async (userJoinId) => {
+    setAcceptLoadingUserId(userJoinId);
     const combinedString = session.user.id + userJoinId;
     const MY_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
     const group_id = uuidv5(combinedString, MY_NAMESPACE);
@@ -65,9 +67,9 @@ const UserInviters = () => {
     } else {
       console.log("User accepted successfully =>", data);
     }
+    setAcceptLoadingUserId(null);
   };
 
-  // 🔁 Realtime Subscription
   useEffect(() => {
     acceptUserFetch();
 
@@ -100,9 +102,12 @@ const UserInviters = () => {
       </h1>
 
       {loading ? (
-        <h1 className="text-xl animate-pulse font-semibold bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent">
-          Loading please wait ...
-        </h1>
+        <div className="flex justify-center items-center py-8">
+          <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="ml-3 text-yellow-500 text-lg font-semibold">
+            Loading, please wait...
+          </span>
+        </div>
       ) : inviteUser.length > 0 ? (
         inviteUser.map((user) => (
           <div
@@ -126,10 +131,7 @@ const UserInviters = () => {
               <div>
                 {user.exit_accept ? (
                   <Link to={"/accept-group-list"}>
-                    <button
-                      disabled={loading}
-                      className="btn my-2 border-black border-2 text-black bg-gradient-to-b from-green-400 via-green-600 to-green-800"
-                    >
+                    <button className="btn my-2 border-black border-2 text-black bg-gradient-to-b from-green-400 via-green-600 to-green-800">
                       <span className="flex justify-center items-center gap-3 font-semibold text-white">
                         <p>Saving Group</p>
                       </span>
@@ -137,12 +139,19 @@ const UserInviters = () => {
                   </Link>
                 ) : (
                   <button
-                    disabled={loading}
                     onClick={() => handleAcceptFunction(user.user_id)}
+                    disabled={acceptLoadingUserId === user.user_id}
                     className="btn my-2 border-black border-2 text-black bg-gradient-to-b from-yellow-400 via-yellow-600 to-yellow-800"
                   >
                     <span className="flex justify-center items-center gap-3 font-semibold text-white">
-                      <p>Accept</p>
+                      {acceptLoadingUserId === user.user_id ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <p>Accepting...</p>
+                        </>
+                      ) : (
+                        <p>Accept</p>
+                      )}
                     </span>
                   </button>
                 )}
@@ -151,7 +160,7 @@ const UserInviters = () => {
           </div>
         ))
       ) : (
-        <p>No users found.</p>
+        <p className="text-yellow-500">No users found.</p>
       )}
     </div>
   );

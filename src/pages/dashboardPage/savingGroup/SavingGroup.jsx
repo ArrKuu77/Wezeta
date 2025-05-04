@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../components/authComponent/context/AuthContext";
 import { supabase } from "../../../../supabaseClient";
 import { useLocation } from "react-router-dom";
+import { LuCalendarCog } from "react-icons/lu";
 
 const SavingGroup = () => {
   const { session } = useAuth();
@@ -104,7 +105,7 @@ const SavingGroup = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 min-h-screen">
       {/* Month Filter */}
-      <div className="form-control w-full max-w-xs">
+      <div className="form-control mx-auto w-full max-w-xs">
         <label className="label">
           <span className="label-text text-yellow-300">Filter by Month</span>
         </label>
@@ -121,8 +122,8 @@ const SavingGroup = () => {
 
       {groupData ? (
         <>
-          <h1 className="text-3xl font-bold text-center">
-            📅 Group Report - {groupData.group_month}
+          <h1 className="text-3xl flex justify-center gap-3 items-center font-bold text-center">
+            <LuCalendarCog /> Group Report - {groupData.group_month}
           </h1>
 
           {/* Filters */}

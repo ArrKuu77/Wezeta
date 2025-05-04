@@ -165,7 +165,7 @@ const Home = () => {
                           <Link
                             key={idx}
                             to={`/saving-group/saving-detail`}
-                            state={use}
+                            state={detail}
                           >
                             <button className="cursor-pointer font-bold w-[90%] p-3 bg-yellow-500 text-black rounded-2xl border-2">
                               Go detail

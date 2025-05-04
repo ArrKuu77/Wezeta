@@ -14,6 +14,7 @@ import { FaBowlFood } from "react-icons/fa6";
 import { GiHealthNormal } from "react-icons/gi";
 import { MdDirectionsCar } from "react-icons/md";
 import { IoIosBeer } from "react-icons/io";
+import { FcDonate } from "react-icons/fc";
 
 const SavingGroupCreate = () => {
   const categories = [
@@ -31,6 +32,7 @@ const SavingGroupCreate = () => {
     { icon: <TiWiFi size={32} />, label: "WifiPayment" },
     { icon: <IoIosBeer size={32} />, label: "Bar" },
     { icon: <PiPhoneCallFill size={32} />, label: "PhonePayment" },
+    { icon: <FcDonate size={32} />, label: "Donate" },
   ];
 
   const {
