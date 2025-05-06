@@ -6,9 +6,10 @@ import "./App.css";
 import router from "./routes/router.jsx";
 import { RouterProvider } from "react-router-dom";
 import { AuthContextProvider } from "./components/authComponent/context/AuthContext";
-
+import { Toaster } from "react-hot-toast";
 createRoot(document.getElementById("root")).render(
   <AuthContextProvider>
     <RouterProvider router={router} />
+    <Toaster position="top-right" reverseOrder={false} />
   </AuthContextProvider>
 );

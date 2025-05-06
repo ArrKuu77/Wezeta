@@ -4,6 +4,8 @@ import { supabase } from "../../../../supabaseClient";
 import { useLocation } from "react-router-dom";
 import { LuCalendarCog } from "react-icons/lu";
 
+import toast from "react-hot-toast";
+
 const SavingGroup = () => {
   const { session } = useAuth();
   const location = useLocation();
@@ -15,6 +17,9 @@ const SavingGroup = () => {
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().toLocaleString("default", { month: "long" })
   );
+
+  const [modalType, setModalType] = useState(null); // 'add' or 'minus'
+  const [incomeAmount, setIncomeAmount] = useState("");
 
   const months = [
     "January",
@@ -64,9 +69,7 @@ const SavingGroup = () => {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => supabase.removeChannel(channel);
   }, [location.state.group_id, selectedMonth]);
 
   const filteredOutcome =
@@ -95,16 +98,63 @@ const SavingGroup = () => {
     0
   );
 
-  // Map member outcomes
   const memberExpenses = {};
   groupData?.group_member_outCome_data?.forEach((item) => {
     const id = item.UploadUser_id;
     memberExpenses[id] = (memberExpenses[id] || 0) + parseInt(item.amount);
   });
+  const [loading, setLoading] = useState(false);
+
+  const handleOpenModal = (type) => {
+    setModalType(type); // 'add' or 'minus'
+    setIncomeAmount("");
+  };
+  const handleCloseModal = () => {
+    setModalType(null);
+    setIncomeAmount("");
+    setLoading(false);
+  };
+
+  const handleSubmitIncome = async () => {
+    setLoading(true);
+    if (!incomeAmount || isNaN(incomeAmount)) return;
+
+    const incomeDelta = (modalType === "add" ? 1 : -1) * parseInt(incomeAmount);
+
+    // Get current member's record
+    const memberIndex = groupData.group_member_income_data.findIndex(
+      (m) => m.member_id === session.user.id
+    );
+
+    if (memberIndex === -1) return;
+
+    const updatedMembers = [...groupData.group_member_income_data];
+    const currentIncome = parseInt(updatedMembers[memberIndex].member_income);
+    const newIncome = Math.max(0, currentIncome + incomeDelta); // Avoid negative income
+
+    updatedMembers[memberIndex] = {
+      ...updatedMembers[memberIndex],
+      member_income: newIncome.toString(),
+    };
+
+    const { error } = await supabase
+      .from("group_detail_create")
+      .update({ group_member_income_data: updatedMembers })
+      .eq("group_id", location.state.group_id)
+      .eq("group_month", selectedMonth);
+
+    if (error) {
+      console.error("Error updating income:", error);
+      toast.success("Income updated error!");
+    } else {
+      toast.success("Income updated successfully!");
+    }
+
+    handleCloseModal();
+  };
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 min-h-screen">
-      {/* Month Filter */}
       <div className="form-control mx-auto w-full max-w-xs">
         <label className="label">
           <span className="label-text text-yellow-300">Filter by Month</span>
@@ -211,7 +261,7 @@ const SavingGroup = () => {
             </div>
           </div>
 
-          {/* Income Card with Expense Per Member */}
+          {/* Income + Balances */}
           <div className="card bg-neutral text-yellow-300 shadow-md">
             <div className="card-body">
               <h2 className="card-title">💰 Member Balances</h2>
@@ -223,21 +273,42 @@ const SavingGroup = () => {
                   return (
                     <li
                       key={member.member_id}
-                      className="flex justify-between  py-2"
+                      className="flex justify-between md:flex-row flex-col py-2"
                     >
                       <div>
-                        <span className="font-bold">{member.member_name}</span>
-                        <div className="text-sm opacity-80">
-                          Income: {income.toLocaleString()} MMK | Expenses:{" "}
-                          {outcome.toLocaleString()} MMK
+                        <div>
+                          <span className="font-bold">
+                            {member.member_name}
+                          </span>
+                          {member.member_id === session.user.id && (
+                            <div className="flex gap-2 mt-1">
+                              <button
+                                onClick={() => handleOpenModal("add")}
+                                className="px-1 py-0.5 md:px-3 md:py-1 bg-green-700 hover:bg-green-600 rounded text-white text-sm"
+                              >
+                                Add Income
+                              </button>
+                              <button
+                                onClick={() => handleOpenModal("minus")}
+                                className="px-1 py-0.5 md:px-3 md:py-1 bg-red-700 hover:bg-red-600 rounded text-white text-sm"
+                              >
+                                Minus Income
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm opacity-80 flex md:flex-row flex-col gap-0.5 mt-1">
+                          <span> Income: {income.toLocaleString()} MMK | </span>
+                          <span>Expenses: {outcome.toLocaleString()} MMK</span>
                         </div>
                       </div>
                       <span
-                        className={`font-bold flex items-center justify-center ${
+                        className={`font-bold md:flex md:items-end inline gap-0.5 md:gap-1 ${
                           balance < 0 ? "text-red-400" : "text-green-400"
                         }`}
                       >
-                        {balance.toLocaleString()} MMK
+                        <span>Balance :</span>
+                        <span>{balance.toLocaleString()} MMK</span>
                       </span>
                     </li>
                   );
@@ -333,6 +404,60 @@ const SavingGroup = () => {
         <p className="text-lg font-bold text-yellow-300">
           Data not found! You can create it.
         </p>
+      )}
+
+      {/* Income Modal */}
+      {modalType && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-neutral p-6 rounded-xl w-full max-w-md text-yellow-300">
+            <div className=" mb-2 flex flex-col gap-3">
+              <span className=" text-lg font-bold ">
+                You are current income is{" "}
+                {parseInt(
+                  groupData.group_member_income_data.find(
+                    (member) => member.member_id == session.user.id
+                  ).member_income
+                ).toLocaleString()}{" "}
+                MMK
+              </span>
+              <h2 className=" text-sm text-white font-semibold">
+                {modalType === "add" ? (
+                  <span className="text-green-400 flex  gap-1">
+                    How much do you want to{" "}
+                    <p className="  text-yellow-500">plus</p> your income?
+                  </span>
+                ) : (
+                  <span className="text-green-400  flex  gap-1">
+                    How much do you want to{" "}
+                    <p className="  text-yellow-500">minus</p> your income?
+                  </span>
+                )}
+              </h2>
+            </div>
+            <input
+              type="number"
+              placeholder="Enter amount"
+              className="input input-bordered w-full bg-black text-yellow-300"
+              value={incomeAmount}
+              onChange={(e) => setIncomeAmount(e.target.value)}
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={handleCloseModal}
+                className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={loading}
+                onClick={handleSubmitIncome}
+                className="px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400"
+              >
+                {loading ? "Submiting..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
