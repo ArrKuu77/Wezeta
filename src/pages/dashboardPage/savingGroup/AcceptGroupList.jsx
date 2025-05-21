@@ -4,7 +4,7 @@ import { supabase } from "../../../../supabaseClient";
 import SearchuserImage from "../searchUser/SearchuserImage";
 import { RiMoneyDollarCircleFill } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
-import UseOnlyAlartBox from "./useOnlyAlartBox";
+import UseOnlyBox from "./UseOnlyBox";
 
 const AcceptGroupList = () => {
   const { session } = useAuth();
@@ -153,7 +153,7 @@ const AcceptGroupList = () => {
 
         {/* Confirm Modal */}
         {showConfirm && (
-          <UseOnlyAlartBox
+          <UseOnlyBox
             handleCancel={handleCancel}
             handleConfirm={handleConfirm}
           />

@@ -1,6 +1,6 @@
 import React from "react";
 
-const UseOnlyAlartBox = ({ handleConfirm, handleCancel }) => {
+const UseOnlyBox = ({ handleConfirm, handleCancel }) => {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-xs bg-opacity-50 flex items-center justify-center z-50 px-4">
       <div className="bg-gray-900 border border-yellow-600 rounded-2xl p-6 max-w-sm w-full shadow-lg text-center space-y-4">
@@ -26,4 +26,4 @@ const UseOnlyAlartBox = ({ handleConfirm, handleCancel }) => {
   );
 };
 
-export default UseOnlyAlartBox;
+export default UseOnlyBox;
