@@ -56,7 +56,15 @@ const SavingGroup = () => {
         console.error("Error fetching group data:", error);
         setGroupData(null);
       } else {
-        setGroupData(data);
+        const { data: fullData } = await supabase
+          .from("group_detail_create_outCome")
+          .select("*")
+          .eq("group_detail_create_id", data?.id);
+        if (fullData) {
+          setGroupData({ ...data, group_member_outCome_data: fullData });
+        } else {
+          alert("Error");
+        }
       }
     };
 
@@ -72,44 +80,72 @@ const SavingGroup = () => {
           table: "group_detail_create",
           filter: `group_id=eq.${location.state.group_id}`,
         },
-        () => fetchGroupData()
+        () => {
+          fetchGroupData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "group_detail_create_outCome",
+          // Optional: filter by related group_detail_create_id if needed
+        },
+        () => {
+          fetchGroupData();
+        }
       )
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [location.state.group_id, selectedMonth, selectedYear]);
 
   const filteredOutcome =
     groupData?.group_member_outCome_data?.filter((item) => {
+      const outcome = item.group_detail_create_outCome_list;
       const userMatch =
-        selectedUser === "all" || item.UploadUser_id === selectedUser;
+        selectedUser === "all" || outcome.UploadUser_id === selectedUser;
       const categoryMatch =
-        selectedCategory === "all" || item.category === selectedCategory;
+        selectedCategory === "all" || outcome.category === selectedCategory;
       const dateMatch =
-        selectedDate === "all" || item.create_DateOnly === selectedDate;
+        selectedDate === "all" || outcome.create_DateOnly === selectedDate;
       return userMatch && categoryMatch && dateMatch;
     }) || [];
 
-  const totalFilteredOutcome = filteredOutcome.reduce(
-    (sum, item) => sum + parseInt(item.amount),
+  const totalFilteredOutcome = filteredOutcome.reduce((sum, item) => {
+    const amount = parseInt(item.group_detail_create_outCome_list.amount);
+    return sum + (isNaN(amount) ? 0 : amount);
+  }, 0);
+
+  const totalOutcome = groupData?.group_member_outCome_data?.reduce(
+    (sum, item) => {
+      const amount = parseInt(item.group_detail_create_outCome_list.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    },
     0
   );
 
   const totalIncome = groupData?.group_member_income_data?.reduce(
-    (sum, item) => sum + parseInt(item.member_income),
+    (sum, item) => {
+      const income = parseInt(item.member_income);
+      return sum + (isNaN(income) ? 0 : income);
+    },
     0
   );
 
-  const totalOutcome = groupData?.group_member_outCome_data?.reduce(
-    (sum, item) => sum + parseInt(item.amount),
-    0
-  );
-
+  // Build memberExpenses map
   const memberExpenses = {};
   groupData?.group_member_outCome_data?.forEach((item) => {
-    const id = item.UploadUser_id;
-    memberExpenses[id] = (memberExpenses[id] || 0) + parseInt(item.amount);
+    const outcome = item.group_detail_create_outCome_list;
+    const id = outcome.UploadUser_id;
+    const amount = parseInt(outcome.amount);
+    memberExpenses[id] =
+      (memberExpenses[id] || 0) + (isNaN(amount) ? 0 : amount);
   });
+
   const [loading, setLoading] = useState(false);
 
   const handleOpenModal = (type) => {
@@ -124,40 +160,93 @@ const SavingGroup = () => {
 
   const handleSubmitIncome = async () => {
     setLoading(true);
-    if (!incomeAmount || isNaN(incomeAmount)) return;
+
+    if (!incomeAmount || isNaN(incomeAmount)) {
+      toast.error("Invalid income amount");
+      setLoading(false);
+      return;
+    }
 
     const incomeDelta = (modalType === "add" ? 1 : -1) * parseInt(incomeAmount);
 
-    // Get current member's record
-    const memberIndex = groupData.group_member_income_data.findIndex(
+    // Step 1: Get group_detail_create record
+    const { data: groupRecord, error: groupError } = await supabase
+      .from("group_detail_create")
+      .select("id, group_member_income_data, extra_money")
+      .eq("group_id", location.state.group_id)
+      .eq("group_month", selectedMonth)
+      .eq("group_year", selectedYear)
+      .maybeSingle();
+
+    if (!groupRecord) {
+      toast.error("Group not found");
+      setLoading(false);
+      return;
+    }
+
+    const updatedMembers = [...(groupRecord.group_member_income_data || [])];
+    const memberIndex = updatedMembers.findIndex(
       (m) => m.member_id === session.user.id
     );
 
-    if (memberIndex === -1) return;
+    if (memberIndex === -1) {
+      toast.error("Member not found in income data");
+      setLoading(false);
+      return;
+    }
 
-    const updatedMembers = [...groupData.group_member_income_data];
-    const currentIncome = parseInt(updatedMembers[memberIndex].member_income);
-    const newIncome = Math.max(0, currentIncome + incomeDelta); // Avoid negative income
+    const currentIncome =
+      parseInt(updatedMembers[memberIndex].member_income) || 0;
+    const newIncome = Math.max(0, currentIncome + incomeDelta);
 
     updatedMembers[memberIndex] = {
       ...updatedMembers[memberIndex],
       member_income: newIncome.toString(),
     };
 
-    const { error } = await supabase
-      .from("group_detail_create")
-      .update({ group_member_income_data: updatedMembers })
-      .eq("group_id", location.state.group_id)
-      .eq("group_month", selectedMonth);
+    // Step 2: Fetch all outcomes for this group
+    const { data: outcomesData, error: outcomesError } = await supabase
+      .from("group_detail_create_outCome")
+      .select("group_detail_create_outCome_list")
+      .eq("group_detail_create_id", groupRecord.id);
 
-    if (error) {
-      console.error("Error updating income:", error);
-      toast.success("Income updated error!");
+    const totalOutcome = (outcomesData || [])
+      .flatMap((entry) => entry.group_detail_create_outCome_list)
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+    const totalIncome = updatedMembers.reduce(
+      (sum, item) => sum + Number(item.member_income || 0),
+      0
+    );
+
+    const previousSaving = groupRecord.extra_money || 0;
+    const newSaving = totalIncome - totalOutcome;
+
+    // Step 3: Update both tables
+    const { error: updateError } = await supabase
+      .from("group_detail_create")
+      .update({
+        group_member_income_data: updatedMembers,
+        extra_money: newSaving,
+      })
+      .eq("id", groupRecord.id);
+
+    const { error: savingUpdateError } = await supabase
+      .from("saving-money-for-month")
+      .update({ group_saving: newSaving })
+      .eq("group_id", location.state.group_id)
+      .eq("group_month", selectedMonth)
+      .eq("group_year", selectedYear);
+
+    if (updateError || savingUpdateError) {
+      // console.error("Update failed:", updateError || savingUpdateError);
+      toast.error("Failed to update income and saving");
     } else {
-      toast.success("Income updated successfully!");
+      toast.success("Income and group saving updated!");
     }
 
     handleCloseModal();
+    setLoading(false);
   };
 
   return (
@@ -220,14 +309,17 @@ const SavingGroup = () => {
                 <option value="all">All Members</option>
                 {[
                   ...new Set(
-                    groupData.group_member_outCome_data.map(
-                      (item) => item.UploadUser_id
+                    groupData.group_member_outCome_data?.map(
+                      (item) =>
+                        item.group_detail_create_outCome_list.UploadUser_id
                     )
                   ),
                 ].map((id) => {
                   const name = groupData.group_member_outCome_data.find(
-                    (item) => item.UploadUser_id === id
-                  )?.UploadUserName;
+                    (item) =>
+                      item.group_detail_create_outCome_list.UploadUser_id === id
+                  )?.group_detail_create_outCome_list.UploadUserName;
+
                   return (
                     <option key={id} value={id}>
                       {name}
@@ -253,11 +345,13 @@ const SavingGroup = () => {
                 {[
                   ...new Set(
                     groupData.group_member_outCome_data.map(
-                      (item) => item.category
+                      (item) => item.group_detail_create_outCome_list.category
                     )
                   ),
                 ].map((cat) => (
-                  <option key={cat}>{cat}</option>
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
@@ -278,11 +372,14 @@ const SavingGroup = () => {
                 {[
                   ...new Set(
                     groupData.group_member_outCome_data.map(
-                      (item) => item.create_DateOnly
+                      (item) =>
+                        item.group_detail_create_outCome_list.create_DateOnly
                     )
                   ),
                 ].map((date) => (
-                  <option key={date}>{date}</option>
+                  <option key={date} value={date}>
+                    {date}
+                  </option>
                 ))}
               </select>
             </div>
@@ -365,28 +462,32 @@ const SavingGroup = () => {
                       filteredOutcome
                         .slice()
                         .reverse()
-                        .map((item, i) => (
-                          <tr className=" hover:bg-neutral-900" key={i}>
-                            <td className=" text-center text-nowrap">
-                              {item.UploadUserName}
-                            </td>
-                            <td className=" text-center text-nowrap">
-                              {item.category}
-                            </td>
-                            <td className=" text-center text-nowrap">
-                              {item.shopName}
-                            </td>
-                            <td className=" text-center">
-                              {item.paymentMethod}
-                            </td>
-                            <td className=" text-center">
-                              {item.create_DateOnly} {item.create_TimeOnly}
-                            </td>
-                            <td className=" text-end">
-                              {parseInt(item.amount).toLocaleString()} MMK
-                            </td>
-                          </tr>
-                        ))
+                        .map((item, i) => {
+                          const outcome = item.group_detail_create_outCome_list;
+                          return (
+                            <tr className="hover:bg-neutral-900" key={i}>
+                              <td className="text-center text-nowrap">
+                                {outcome.UploadUserName}
+                              </td>
+                              <td className="text-center text-nowrap">
+                                {outcome.category}
+                              </td>
+                              <td className="text-center text-nowrap">
+                                {outcome.shopName}
+                              </td>
+                              <td className="text-center">
+                                {outcome.paymentMethod}
+                              </td>
+                              <td className="text-center">
+                                {outcome.create_DateOnly}{" "}
+                                {outcome.create_TimeOnly}
+                              </td>
+                              <td className="text-end">
+                                {parseInt(outcome.amount).toLocaleString()} MMK
+                              </td>
+                            </tr>
+                          );
+                        })
                     ) : (
                       <tr>
                         <td colSpan="6" className="text-center text-red-400">

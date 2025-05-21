@@ -8,7 +8,6 @@ export const AuthContextProvider = ({ children }) => {
   const [photo, setPhoto] = useState(null);
   const [googlePhoto, setGooglePhoto] = useState(null);
 
-  // 📦 Load profile image from Supabase Storage
   const getMedia = async (userId) => {
     const { data, error } = await supabase.storage
       .from("user-photo")
@@ -21,17 +20,35 @@ export const AuthContextProvider = ({ children }) => {
     else console.warn("Storage fetch error:", error);
   };
 
-  // 🟢 Init session + listener
+  // 🟢 Load session and subscribe to auth changes
   useEffect(() => {
     const loadSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error || !session) {
+          setSession(null);
+          localStorage.removeItem("profileCreated");
+        } else {
+          setSession(session);
+        }
+      } catch (err) {
+        console.error("Session fetch failed:", err.message);
+        setSession(null);
+        localStorage.removeItem("profileCreated");
+      }
     };
 
     loadSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
+        if (!session) {
+          localStorage.removeItem("profileCreated");
+        }
         setSession(session);
       }
     );
@@ -39,7 +56,7 @@ export const AuthContextProvider = ({ children }) => {
     return () => authListener.subscription.unsubscribe();
   }, []);
 
-  // 🔁 Optional: Track new OAuth users and add profile to 'user-data'
+  // 🔁 Auto-insert new user into 'user-data' table
   useEffect(() => {
     const checkAndInsertUser = async () => {
       if (!session?.user || localStorage.getItem("profileCreated")) return;
@@ -157,6 +174,7 @@ export const AuthContextProvider = ({ children }) => {
     } else {
       alert("User signed out.");
       localStorage.removeItem("profileCreated");
+      setSession(null);
     }
   };
 

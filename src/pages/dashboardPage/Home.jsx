@@ -28,6 +28,8 @@ const Home = () => {
   const [groupDetails, setGroupDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [useGroups, setUseGroups] = useState([]);
+  // console.log(groupDetails);
+
   const fetchGroupDetails = async () => {
     setLoading(true);
     try {
@@ -77,33 +79,12 @@ const Home = () => {
 
       {/* Month Selector */}
       <div className="form-control max-w-xs mb-6">
-        <label className="label">
-          <span className="label-text text-yellow-300">Select Month</span>
+        <label className="label flex items-center gap-3">
+          <span className="label-text text-sm text-yellow-300">
+            Current Month:
+          </span>
+          <h1 className="text-lg text-white">{selectedMonth}</h1>
         </label>
-        <select
-          className="select select-bordered bg-black text-yellow-300"
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-        >
-          {[
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-          ].map((month) => (
-            <option key={month} value={month}>
-              {month}
-            </option>
-          ))}
-        </select>
       </div>
 
       {loading ? (
@@ -115,10 +96,7 @@ const Home = () => {
               (sum, member) => sum + parseInt(member.member_income || 0),
               0
             );
-            const totalOutcome = detail.group_member_outCome_data?.reduce(
-              (sum, item) => sum + parseInt(item.amount || 0),
-              0
-            );
+            const totalOutcome = totalIncome - detail.extra_money;
             const pieData = [
               { name: "Income", value: totalIncome },
               { name: "Outcome", value: totalOutcome },
@@ -154,9 +132,9 @@ const Home = () => {
                       <li>
                         💰 Total Income: {totalIncome.toLocaleString()} MMK
                       </li>
-                      <li>
+                      {/* <li>
                         🧾 Total Outcome: {totalOutcome.toLocaleString()} MMK
-                      </li>
+                      </li> */}
                       <li>
                         📦 Extra Money:{" "}
                         {parseInt(detail.extra_money).toLocaleString()} MMK
@@ -201,7 +179,7 @@ const Home = () => {
                     </PieChart>
                   </ResponsiveContainer>
 
-                  <div className="">
+                  <div className=" hidden md:block">
                     <h3 className="text-lg font-semibold mb-2">
                       📊 Bar Chart View
                     </h3>

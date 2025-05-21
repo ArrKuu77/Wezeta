@@ -6,7 +6,7 @@ import { FaNotesMedical } from "react-icons/fa6";
 const SavingGroupDetail = () => {
   const location = useLocation();
   const group = location.state;
-  console.log("group", group);
+  // console.log("group", group);
 
   return (
     <div className="   bg-gray-950  pt-4">
@@ -35,7 +35,9 @@ const SavingGroupDetail = () => {
             ))}
             <div>
               <h2 className=" bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent">
-                {group?.user_accept_data?.user_name}
+                {group?.user_accept_data?.user_name !==
+                  group?.user_join_data?.user_name &&
+                  group?.user_accept_data?.user_name}
               </h2>
               <h2 className=" bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent">
                 {group?.user_join_data?.user_name}

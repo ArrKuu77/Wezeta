@@ -3,103 +3,145 @@ import { useAuth } from "../../../components/authComponent/context/AuthContext";
 import { supabase } from "../../../../supabaseClient";
 import SearchuserImage from "../searchUser/SearchuserImage";
 import { RiMoneyDollarCircleFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import UseOnlyAlartBox from "./useOnlyAlartBox";
 
 const AcceptGroupList = () => {
   const { session } = useAuth();
+  const userId = session?.user?.id;
+  const navigate = useNavigate();
+
   const [groupData, setGroupData] = useState([]);
-  const [loading, setLoading] = useState(true); // 👈 Add loading state
+  const [loading, setLoading] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const groupFetchFunction = async () => {
+  const fetchGroups = async () => {
     try {
-      setLoading(true); // 👈 Start loading
+      setLoading(true);
 
-      const { data: groupData, error: groupError } = await supabase
+      const { data: rawGroups, error: groupError } = await supabase
         .from("create-group")
         .select("*")
-        .or(`user_join.eq.${session.user.id},user_accept.eq.${session.user.id}`)
+        .or(`user_join.eq.${userId},user_accept.eq.${userId}`)
         .eq("exit_accept", true);
 
-      if (groupError) {
-        console.error("Error fetching group data:", groupError);
+      if (groupError) throw groupError;
+
+      if (!rawGroups.length) {
+        setGroupData([]);
         setLoading(false);
         return;
       }
 
-      if (groupData.length > 0) {
-        const userIds = [
-          ...new Set(
-            groupData.flatMap((item) => [item.user_join, item.user_accept])
-          ),
-        ];
+      const userIds = [
+        ...new Set(rawGroups.flatMap((g) => [g.user_join, g.user_accept])),
+      ];
 
-        const { data: userData, error: userError } = await supabase
-          .from("user-data")
-          .select("*")
-          .in("user_id", userIds);
+      const { data: users, error: userError } = await supabase
+        .from("user-data")
+        .select("*")
+        .in("user_id", userIds);
 
-        if (userError) {
-          console.error("Error fetching user data:", userError);
-          setLoading(false);
-          return;
-        }
+      if (userError) throw userError;
 
-        const userMap = {};
-        userData.forEach((user) => {
-          userMap[user.user_id] = user;
-        });
+      const userMap = Object.fromEntries(
+        users.map((user) => [user.user_id, user])
+      );
 
-        const enrichedGroupData = groupData.map((group) => ({
-          ...group,
-          user_join_data: userMap[group.user_join] || null,
-          user_accept_data: userMap[group.user_accept] || null,
-        }));
+      const enrichedGroups = rawGroups.map((group) => ({
+        ...group,
+        user_join_data: userMap[group.user_join],
+        user_accept_data: userMap[group.user_accept],
+      }));
 
-        setGroupData(enrichedGroupData);
-      } else {
-        setGroupData([]);
-      }
-
-      setLoading(false); // 👈 End loading
+      setGroupData(enrichedGroups);
     } catch (error) {
-      console.error("Unexpected error:", error);
+      console.error("Error loading group data:", error.message);
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    groupFetchFunction();
+    fetchGroups();
 
     const channel = supabase
       .channel("realtime-accept-groups")
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "create-group",
-        },
+        { event: "*", schema: "public", table: "create-group" },
         (payload) => {
           const row = payload.new || payload.old;
-          if (
-            row?.user_join === session.user.id ||
-            row?.user_accept === session.user.id
-          ) {
-            console.log("Realtime update triggered:", payload);
-            groupFetchFunction();
+          if (row?.user_join === userId || row?.user_accept === userId) {
+            fetchGroups();
           }
         }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [session.user.id]);
+    return () => supabase.removeChannel(channel);
+  }, [userId]);
+
+  const hasPrivateGroup = groupData.some((g) => g.group_id === userId);
+
+  const handleCreateClick = () => setShowConfirm(true);
+  const handleCancel = () => setShowConfirm(false);
+
+  const handleConfirm = async () => {
+    setShowConfirm(false);
+    const { error } = await supabase.from("create-group").insert({
+      user_join: userId,
+      user_accept: userId,
+      exit_join: true,
+      exit_accept: true,
+      group_id: userId,
+    });
+
+    if (error) alert(error.message);
+  };
+
+  const renderUserCard = (label, user) => (
+    <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full sm:w-[35%]">
+      <div className="size-20 sm:size-24">
+        <SearchuserImage
+          userId={user?.user_id}
+          addDesign="w-full h-full object-cover rounded-full"
+        />
+      </div>
+      <div>
+        <p className="text-xs uppercase tracking-wider text-gray-400">
+          {label}
+        </p>
+        <p className="text-sm font-semibold text-yellow-400 group-hover:text-yellow-300 transition">
+          {user?.user_name || "Unknown"}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
       <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12 w-full">
+        {/* Create Private Group Section */}
+        {!loading && (
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-900 border border-yellow-600 rounded-xl p-6 shadow-lg mb-8">
+            <p className="text-yellow-300 text-lg font-medium">
+              {hasPrivateGroup
+                ? "You have a private chart"
+                : "🔒 Saving private chart"}
+            </p>
+            {!hasPrivateGroup && (
+              <button
+                onClick={handleCreateClick}
+                className=" cursor-pointer bg-gradient-to-r from-yellow-400 via-yellow-600 to-yellow-800 text-black font-semibold px-6 py-2 rounded-xl shadow hover:brightness-110 transition duration-200"
+              >
+                ➕ Create
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Title Section */}
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-t from-yellow-200 via-yellow-500 to-yellow-950 bg-clip-text text-transparent mb-2">
             Saving Groups
@@ -109,25 +151,27 @@ const AcceptGroupList = () => {
           </p>
         </div>
 
-        {/* Loading State */}
+        {/* Confirm Modal */}
+        {showConfirm && (
+          <UseOnlyAlartBox
+            handleCancel={handleCancel}
+            handleConfirm={handleConfirm}
+          />
+        )}
+
+        {/* Loading Placeholder */}
         {loading ? (
           <div className="flex flex-col gap-4">
-            {[...Array(3)].map((_, index) => (
+            {[...Array(3)].map((_, idx) => (
               <div
-                key={index}
-                className="mx-auto w-full max-w-3xl bg-gradient-to-br from-gray-900 to-gray-800  rounded-md border border-yellow-500 p-4"
+                key={idx}
+                className="mx-auto w-full max-w-3xl bg-gray-800 rounded-md border border-yellow-500 p-4 animate-pulse"
               >
-                <div className="flex animate-pulse space-x-4">
-                  <div className="size-10 sm:size-16 rounded-full bg-gray-700"></div>
-                  <div className="flex-1 space-y-6 py-1">
-                    <div className="h-2 rounded bg-gray-700 w-1/2"></div>
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="col-span-2 h-2 rounded bg-gray-700"></div>
-                        <div className="col-span-1 h-2 rounded bg-gray-700"></div>
-                      </div>
-                      <div className="h-2 rounded bg-gray-700"></div>
-                    </div>
+                <div className="flex space-x-4">
+                  <div className="size-10 sm:size-16 rounded-full bg-gray-700" />
+                  <div className="flex-1 space-y-3 py-1">
+                    <div className="h-2 bg-gray-700 rounded w-1/2" />
+                    <div className="h-2 bg-gray-700 rounded w-3/4" />
                   </div>
                 </div>
               </div>
@@ -140,43 +184,17 @@ const AcceptGroupList = () => {
             {groupData.map((group) => (
               <div
                 key={group.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-br from-gray-900 to-gray-800 
-                rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 group hover:scale-[1.02]"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 shadow-lg hover:shadow-2xl group hover:scale-[1.02] transition-all duration-300"
               >
                 <div className="flex sm:w-[70%] sm:justify-evenly">
-                  <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full sm:w-[35%]">
-                    <div className="size-20 sm:size-24">
-                      <SearchuserImage
-                        userId={group.user_join_data?.user_id}
-                        addDesign="w-full h-full object-cover rounded-full"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-gray-400">
-                        Joined by
-                      </p>
-                      <p className="text-sm font-semibold text-yellow-400 group-hover:text-yellow-300 transition">
-                        {group.user_join_data?.user_name || "Unknown"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col-reverse md:flex-row items-center gap-4 w-full sm:w-[35%]">
-                    <div className="size-20 sm:size-24">
-                      <SearchuserImage
-                        userId={group.user_accept_data?.user_id}
-                        addDesign="w-full h-full object-cover rounded-full"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-gray-400">
-                        Accepted by
-                      </p>
-                      <p className="text-sm font-semibold text-yellow-400 group-hover:text-yellow-300 transition">
-                        {group.user_accept_data?.user_name || "Unknown"}
-                      </p>
-                    </div>
-                  </div>
+                  {group.user_join === group.user_accept ? (
+                    renderUserCard("Your private chart", group.user_accept_data)
+                  ) : (
+                    <>
+                      {renderUserCard("Joined by", group.user_join_data)}
+                      {renderUserCard("Accepted by", group.user_accept_data)}
+                    </>
+                  )}
                 </div>
 
                 <div className="w-full sm:w-auto flex justify-center items-center sm:justify-end">

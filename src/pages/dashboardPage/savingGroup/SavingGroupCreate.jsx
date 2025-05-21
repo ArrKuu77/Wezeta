@@ -70,7 +70,7 @@ const SavingGroupCreate = () => {
       const alreadySubmitted = existingGroup?.group_member_income_data?.some(
         (item) => item.member_id === session.user.id
       );
-      console.log("alreadySubmitted", alreadySubmitted);
+      // console.log("alreadySubmitted", alreadySubmitted);
       setHasSubmittedIncome(alreadySubmitted);
     };
 
@@ -160,14 +160,29 @@ const SavingGroupCreate = () => {
       const previousSaving = await getPreviousSaving(group.group_id);
 
       if (existingGroup) {
-        const updatedOutCome = Array.isArray(
-          existingGroup.group_member_outCome_data
-        )
-          ? [...existingGroup.group_member_outCome_data, newUploadData]
-          : [existingGroup.group_member_outCome_data, newUploadData];
+        // ✅ Outcome append logic
+        const { data: existingOutcome } = await supabase
+          .from("group_detail_create_outCome")
+          .select("*")
+          .eq("group_detail_create_id", existingGroup.id)
+          .single();
 
+        if (!existingOutcome) {
+          // No outcome record yet, insert new one
+          await supabase.from("group_detail_create_outCome").insert({
+            group_detail_create_id: existingGroup.id,
+            group_detail_create_outCome_list: newUploadData,
+          });
+        } else {
+          // Outcome exists, append new entry
+          await supabase.from("group_detail_create_outCome").insert({
+            group_detail_create_id: existingGroup.id,
+            group_detail_create_outCome_list: newUploadData,
+          });
+        }
+
+        // ✅ Income update logic
         let updatedIncome = existingGroup.group_member_income_data || [];
-
         if (!hasSubmittedIncome) {
           updatedIncome = [...updatedIncome, memberIncomeItem];
         }
@@ -176,17 +191,25 @@ const SavingGroupCreate = () => {
           (sum, item) => sum + Number(item.member_income || 0),
           0
         );
-        const totalOutcome = updatedOutCome.reduce(
-          (sum, item) => sum + Number(item.amount || 0),
+
+        const { data: allOutcomes } = await supabase
+          .from("group_detail_create_outCome")
+          .select("group_detail_create_outCome_list")
+          .eq("group_detail_create_id", existingGroup.id);
+        // console.log(allOutcomes);
+
+        const totalOutcome = allOutcomes.reduce(
+          (sum, o) =>
+            sum + Number(o.group_detail_create_outCome_list.amount || 0),
           0
         );
 
         const extraMoney = totalIncome - totalOutcome + previousSaving;
 
+        // ✅ Update group_detail_create and savings
         await supabase
           .from("group_detail_create")
           .update({
-            group_member_outCome_data: updatedOutCome,
             group_member_income_data: updatedIncome,
             extra_money: extraMoney,
           })
@@ -202,40 +225,51 @@ const SavingGroupCreate = () => {
           .eq("group_month", monthName)
           .eq("group_year", endYear);
       } else {
+        // First-time creation for the month
         const income = hasSubmittedIncome
           ? 0
           : Number(memberIncomeItem.member_income) + previousSaving;
-
         const amount = Number(newUploadData.amount);
         const extraMoney = income - amount;
 
-        await supabase.from("group_detail_create").insert([
-          {
-            group_id: group.group_id,
-            group_month: monthName,
-            group_year: endYear,
-            group_member_outCome_data: [newUploadData],
-            group_member_income_data: hasSubmittedIncome
-              ? []
-              : [memberIncomeItem],
-            extra_money: extraMoney,
-          },
-        ]);
-
-        await supabase.from("saving-money-for-month").insert([
-          {
-            group_id: group.group_id,
-            group_year: endYear,
-            group_month: monthName,
-            group_saving: extraMoney,
-          },
-        ]);
+        const { data: insertGroup } = await supabase
+          .from("group_detail_create")
+          .insert([
+            {
+              group_id: group.group_id,
+              group_month: monthName,
+              group_year: endYear,
+              group_member_income_data: hasSubmittedIncome
+                ? []
+                : [memberIncomeItem],
+              extra_money: extraMoney,
+            },
+          ])
+          .select()
+          .single();
+        // console.log(insertGroup);
+        if (insertGroup) {
+          await supabase.from("group_detail_create_outCome").insert([
+            {
+              group_detail_create_id: insertGroup.id,
+              group_detail_create_outCome_list: newUploadData,
+            },
+          ]);
+          await supabase.from("saving-money-for-month").insert([
+            {
+              group_id: group.group_id,
+              group_year: endYear,
+              group_month: monthName,
+              group_saving: extraMoney,
+            },
+          ]);
+        }
       }
 
       setSuccessMsg("✅ Transaction saved successfully!");
       nav(-1);
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       setErrorMsg("❌ Failed to save transaction. Please try again.");
     } finally {
       setLoading(false);
