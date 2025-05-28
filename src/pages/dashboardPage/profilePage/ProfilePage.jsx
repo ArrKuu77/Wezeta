@@ -7,7 +7,7 @@ import { data, Link } from "react-router-dom";
 import { TbXboxXFilled } from "react-icons/tb";
 import { v4 as uuid4 } from "uuid";
 import { supabase } from "../../../../supabaseClient";
-import avatar from "daisyui/components/avatar";
+// import avatar from "daisyui/components/avatar";
 import ChangeUserDataAlartbox from "./ChangeUserDataAlartbox";
 import ChangeUserInputDetail from "./ChangeUserInputDetail";
 import LoadingProfileImageComponent from "../../../components/lottiesComponent/LoadingProfileImageComponent";

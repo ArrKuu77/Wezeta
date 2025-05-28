@@ -3,7 +3,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { useEffect, useState } from "react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { createClient } from "@supabase/supabase-js";
-import "./App.css";
+// import "./App.css";
 
 // ✅ Create the Supabase client **outside** the component
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

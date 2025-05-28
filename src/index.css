@@ -1,7 +1,6 @@
-/* <div>
-<Link to={`/accept-group-list`}>
-  <button className=" cursor-pointer font-bold w-full p-3 bg-yellow-500 text-black rounded-2xl border-2">
-    Go Accept Group List
-  </button>
-</Link>
-</div> */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@plugin "daisyui"; */

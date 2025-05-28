@@ -1,21 +1,21 @@
 import React from "react";
-import NavbarLinkComponent from "./NavbarLinkComponents";
-import { Link, Outlet } from "react-router-dom";
-import { MdManageAccounts } from "react-icons/md";
-import { ImMenu } from "react-icons/im";
+import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 
 const DashboardLayout = () => {
   return (
     <>
-      <nav className=" sticky top-0 z-50  bg-gradient-to-br bg-black/60 backdrop-blur-sm  shadow-lg shadow-neutral-800">
-        <div className="  w-full py-3">
-          <Navbar />
-        </div>
+      {/* Sticky Navbar */}
+      <nav className="sticky top-0 z-50 bg-black/80 backdrop-blur-md shadow-md">
+        <Navbar />
       </nav>
-      <div className=" h-screen   bg-gray-950 ">
-        <Outlet />
-      </div>
+
+      {/* Main content */}
+      <main className="min-h-screen bg-gray-950 text-yellow-400">
+        <div className="w-11/12 mx-auto py-6">
+          <Outlet />
+        </div>
+      </main>
     </>
   );
 };

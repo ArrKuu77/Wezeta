@@ -15,25 +15,10 @@ import { GiHealthNormal } from "react-icons/gi";
 import { MdDirectionsCar } from "react-icons/md";
 import { IoIosBeer } from "react-icons/io";
 import { FcDonate } from "react-icons/fc";
+import { TbCategoryPlus } from "react-icons/tb";
 
-const SavingGroupCreate = () => {
-  const categories = [
-    { icon: <FaBowlFood size={32} />, label: "Food" },
-    { icon: <FaBusAlt size={32} />, label: "YBS Bus" },
-    { icon: <IoFastFood size={32} />, label: " Snacks" },
-    { icon: <GiHealthNormal size={32} />, label: " Medical" },
-    { icon: <MdDirectionsCar size={32} />, label: " Car" },
-    { icon: <MdShoppingCart size={32} />, label: "Shopping" },
-    { icon: <IoHome size={32} />, label: "HomePayment" },
-    { icon: <IoShirt size={32} />, label: "Shirt for Men" },
-    { icon: <GiPoloShirt size={32} />, label: "Shirt for Women" },
-    { icon: <PiPants size={32} />, label: "Pants for Men" },
-    { icon: <PiPantsFill size={32} />, label: "Pants for Women" },
-    { icon: <TiWiFi size={32} />, label: "WifiPayment" },
-    { icon: <IoIosBeer size={32} />, label: "Bar" },
-    { icon: <PiPhoneCallFill size={32} />, label: "PhonePayment" },
-    { icon: <FcDonate size={32} />, label: "Donate" },
-  ];
+const PublicSavingGroupCreate = () => {
+  const [categories, setCategories] = useState([]);
 
   const {
     register,
@@ -60,7 +45,7 @@ const SavingGroupCreate = () => {
   useEffect(() => {
     const checkIncomeSubmitted = async () => {
       const { data: existingGroup } = await supabase
-        .from("group_detail_create")
+        .from("public_group_detail_create")
         .select("group_member_income_data")
         .eq("group_id", group.group_id)
         .eq("group_month", monthName)
@@ -73,8 +58,40 @@ const SavingGroupCreate = () => {
       // console.log("alreadySubmitted", alreadySubmitted);
       setHasSubmittedIncome(alreadySubmitted);
     };
+    const checkCategoris = async () => {
+      const { data: groupCategories } = await supabase
+        .from("public_group_categories")
+        .select("categories_name")
+        .eq("group_id", group.group_id);
+      // console.log(groupCategories, group.group_id);
 
+      if (groupCategories) {
+        setCategories(groupCategories);
+      }
+      // console.log("alreadySubmitted", alreadySubmitted);
+    };
+    checkCategoris();
     checkIncomeSubmitted();
+    const channel = supabase
+      .channel("public_group_categories_realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // "INSERT", "UPDATE", "DELETE"
+          schema: "public",
+          table: "public_group_categories",
+          filter: `group_id=eq.${group.group_id}`,
+        },
+        (payload) => {
+          // console.log("Realtime category change:", payload);
+          checkCategoris(); // Refresh on change
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel); // Clean up on unmount
+    };
   }, [group.group_id, session.user.id]);
 
   const handleCategorySelect = (label) => {
@@ -87,32 +104,32 @@ const SavingGroupCreate = () => {
     if (step > 0) setStep(step - 1);
   };
   // ✅ Utility to get previous month name
-  const getPreviousMonthName = () => {
-    const now = new Date();
-    const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    return prevDate.toLocaleString("default", { month: "long" });
-  };
+  // const getPreviousMonthName = () => {
+  //   const now = new Date();
+  //   const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  //   return prevDate.toLocaleString("default", { month: "long" });
+  // };
 
   // ✅ Utility to get previous saving money
-  const getPreviousSaving = async (group_id) => {
-    const prevMonthName = getPreviousMonthName();
+  // const getPreviousSaving = async (group_id) => {
+  //   // const prevMonthName = getPreviousMonthName();
 
-    const { data, error } = await supabase
-      .from("saving-money-for-month")
-      .select("group_saving")
-      .eq("group_id", group_id)
-      .eq("group_month", prevMonthName)
-      .eq("group_year", endYear)
+  //   const { data, error } = await supabase
+  //     .from("saving-money-for-month")
+  //     .select("group_saving")
+  //     .eq("group_id", group_id)
+  //     .eq("group_month", prevMonthName)
+  //     .eq("group_year", endYear)
 
-      .single();
+  //     .single();
 
-    if (error) {
-      console.warn("Previous saving fetch error:", error.message);
-      return 0;
-    }
+  //   if (error) {
+  //     console.warn("Previous saving fetch error:", error.message);
+  //     return 0;
+  //   }
 
-    return data?.group_saving || 0;
-  };
+  //   return data?.group_saving || 0;
+  // };
 
   const handleUplodeFunction = async (data) => {
     setLoading(true);
@@ -134,7 +151,7 @@ const SavingGroupCreate = () => {
 
       const newUploadData = {
         amount: data.Amount,
-        shopName: data.ShopName,
+        customerName: data.customerName,
         paymentMethod: data.paymentMethod,
         category: data.category,
         create_DateOnly: dateOnly,
@@ -150,38 +167,24 @@ const SavingGroupCreate = () => {
       };
 
       const { data: existingGroup } = await supabase
-        .from("group_detail_create")
+        .from("public_group_detail_create")
         .select("*")
         .eq("group_id", group.group_id)
         .eq("group_month", monthName)
         .eq("group_year", endYear)
         .single();
 
-      const previousSaving = await getPreviousSaving(group.group_id);
+      // const previousSaving = await getPreviousSaving(group.group_id);
+      // console.log(existingGroup);
+      // console.log(newUploadData);
 
       if (existingGroup) {
-        // ✅ Outcome append logic
-        const { data: existingOutcome } = await supabase
-          .from("group_detail_create_outCome")
-          .select("*")
-          .eq("group_detail_create_id", existingGroup.id)
-          .single();
-
-        if (!existingOutcome) {
-          // No outcome record yet, insert new one
-          await supabase.from("group_detail_create_outCome").insert({
+        await supabase.from("public_group_detail_create_outCome").insert([
+          {
             group_detail_create_id: existingGroup.id,
             group_detail_create_outCome_list: newUploadData,
-          });
-        } else {
-          // Outcome exists, append new entry
-          await supabase.from("group_detail_create_outCome").insert([
-            {
-              group_detail_create_id: existingGroup.id,
-              group_detail_create_outCome_list: newUploadData,
-            },
-          ]);
-        }
+          },
+        ]);
 
         // ✅ Income update logic
         let updatedIncome = existingGroup.group_member_income_data || [];
@@ -189,53 +192,19 @@ const SavingGroupCreate = () => {
           updatedIncome = [...updatedIncome, memberIncomeItem];
         }
 
-        const totalIncome = updatedIncome.reduce(
-          (sum, item) => sum + Number(item.member_income || 0),
-          0
-        );
-
-        const { data: allOutcomes } = await supabase
-          .from("group_detail_create_outCome")
-          .select("group_detail_create_outCome_list")
-          .eq("group_detail_create_id", existingGroup.id);
-        // console.log(allOutcomes);
-
-        const totalOutcome = allOutcomes.reduce(
-          (sum, o) =>
-            sum + Number(o.group_detail_create_outCome_list.amount || 0),
-          0
-        );
-
-        const extraMoney = totalIncome - totalOutcome + previousSaving;
-
         // ✅ Update group_detail_create and savings
         await supabase
-          .from("group_detail_create")
+          .from("public_group_detail_create")
           .update({
             group_member_income_data: updatedIncome,
-            extra_money: extraMoney,
           })
           .eq("group_id", group.group_id)
           .eq("group_month", monthName);
-
-        await supabase
-          .from("saving-money-for-month")
-          .update({
-            group_saving: extraMoney,
-          })
-          .eq("group_id", group.group_id)
-          .eq("group_month", monthName)
-          .eq("group_year", endYear);
       } else {
         // First-time creation for the month
-        const income = hasSubmittedIncome
-          ? 0
-          : Number(memberIncomeItem.member_income) + previousSaving;
-        const amount = Number(newUploadData.amount);
-        const extraMoney = income - amount;
 
         const { data: insertGroup } = await supabase
-          .from("group_detail_create")
+          .from("public_group_detail_create")
           .insert([
             {
               group_id: group.group_id,
@@ -244,25 +213,16 @@ const SavingGroupCreate = () => {
               group_member_income_data: hasSubmittedIncome
                 ? []
                 : [memberIncomeItem],
-              extra_money: extraMoney,
             },
           ])
           .select()
           .single();
         // console.log(insertGroup);
         if (insertGroup) {
-          await supabase.from("group_detail_create_outCome").insert([
+          await supabase.from("public_group_detail_create_outCome").insert([
             {
               group_detail_create_id: insertGroup.id,
               group_detail_create_outCome_list: newUploadData,
-            },
-          ]);
-          await supabase.from("saving-money-for-month").insert([
-            {
-              group_id: group.group_id,
-              group_year: endYear,
-              group_month: monthName,
-              group_saving: extraMoney,
             },
           ]);
         }
@@ -290,7 +250,7 @@ const SavingGroupCreate = () => {
           </button>
         ) : (
           <Link
-            to="/saving-group/saving-detail"
+            to="/public-saving-group/public-saving-detail"
             state={group}
             className="mb-4 block text-yellow-400 hover:underline"
           >
@@ -306,19 +266,35 @@ const SavingGroupCreate = () => {
             <p className="text-sm font-bold text-white mb-4">
               Please Select Choice Categories
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {categories.map((cat, idx) => (
                 <div
                   key={idx}
-                  onClick={() => handleCategorySelect(cat.label)}
-                  className="flex flex-col items-center p-4 bg-gray-800 rounded-2xl cursor-pointer hover:bg-yellow-500 hover:scale-105 transition-all"
+                  onClick={() => handleCategorySelect(cat.categories_name)}
+                  className="flex flex-col items-center justify-center text-center p-2 bg-gray-800 hover:bg-yellow-500 hover:text-black text-yellow-100 rounded-2xl shadow-md hover:shadow-yellow-500/50 transition-all duration-300 cursor-pointer group"
                 >
-                  <div className="text-yellow-300 text-3xl">{cat.icon}</div>
-                  <p className="text-white text-nowrap font-semibold mt-2">
-                    {cat.label}
+                  {/* Optional icon or graphic placeholder */}
+                  <div className="w-10 h-10 flex items-center justify-center bg-yellow-400 text-black rounded-full text-xl font-bold mb-2 group-hover:scale-110 transition-transform duration-200">
+                    {cat.categories_name.charAt(0).toUpperCase()}
+                  </div>
+                  <p className="font-semibold text-sm truncate w-full">
+                    {cat.categories_name}
                   </p>
                 </div>
               ))}
+
+              {/* Create New Category Button */}
+              <Link to="createCategories" state={group ? group : {}}>
+                <div className="flex flex-col items-center justify-center text-center p-2 bg-yellow-400  hover:bg-yellow-500 hover:text-black text-yellow-100 rounded-2xl shadow-md hover:shadow-yellow-500/50 transition-all duration-300 cursor-pointer group">
+                  {/* Optional icon or graphic placeholder */}
+                  <div className="w-10 h-10 flex items-center justify-center bg-gray-800  rounded-full text-xl font-bold mb-2 group-hover:scale-110 transition-transform duration-200">
+                    <TbCategoryPlus className="text-xl " />
+                  </div>
+                  <p className="font-semibold text-sm truncate w-full ">
+                    <p className="font-bold text-sm">Add Category</p>
+                  </p>
+                </div>
+              </Link>
             </div>
           </div>
         )}
@@ -360,10 +336,10 @@ const SavingGroupCreate = () => {
               <AuthLableInput
                 register={register}
                 errors={errors}
-                lableText="Shop Name"
+                lableText="Customer Name"
                 inputType="text"
-                idLink="ShopName"
-                Name="ShopName"
+                idLink="customerName"
+                Name="customerName"
               />
               <div className="flex flex-col">
                 <label className="text-gray-300 mb-1 font-medium">
@@ -420,4 +396,4 @@ const SavingGroupCreate = () => {
   );
 };
 
-export default SavingGroupCreate;
+export default PublicSavingGroupCreate;

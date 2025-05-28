@@ -131,32 +131,30 @@ const SearchUsers = () => {
 
   return (
     <div className="p-4 max-w-xl mx-auto text-white">
-      {/* ...Search bar and button... */}
+      {/* Search bar and button */}
       <div className="flex gap-2 justify-between items-end mb-4">
-        <div>
-          <label htmlFor="search" className="text-lg font-semibold">
+        <div className="w-full">
+          <label htmlFor="search" className="text-lg font-semibold block">
             Search (user-email or user-name)
           </label>
           <input
             id="search"
             type="text"
             placeholder="Search user by name..."
-            className="input my-2 input-bordered w-full text-white border-white"
+            className="w-full px-4 py-2 mt-2 border border-white bg-transparent text-white rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
             ref={searchTermRef}
           />
         </div>
         <button
           onClick={handleSearch}
-          className="btn my-2 border-black border-2 text-black !bg-gradient-to-b from-yellow-400 via-yellow-600 to-yellow-800"
+          className="min-w-[120px] px-4 py-2 font-semibold rounded border-2 border-black bg-gradient-to-b from-yellow-400 via-yellow-600 to-yellow-800 text-white hover:brightness-110"
         >
           {loading ? (
-            <span className="flex gap-3 items-center animate-pulse font-semibold text-white">
-              Searching... <VscLoading className="size-6 animate-spin" />
+            <span className="flex gap-2 items-center animate-pulse">
+              Searching... <VscLoading className="w-5 h-5 animate-spin" />
             </span>
           ) : (
-            <span className="flex gap-3 items-center font-semibold text-white">
-              Search
-            </span>
+            <span className="flex gap-2 items-center">Search</span>
           )}
         </button>
       </div>
@@ -167,7 +165,7 @@ const SearchUsers = () => {
           results.map((user) => (
             <div
               key={user.id}
-              className="flex justify-between items-center mb-2 p-3 border rounded bg-gray-900/50 text-yellow-500 hover:bg-gradient-to-br hover:from-gray-800 hover:via-gray-900 hover:to-black hover:scale-100 scale-90"
+              className="flex justify-between items-center mb-3 p-3 border rounded bg-gray-900/50 text-yellow-500 hover:bg-gradient-to-br hover:from-gray-800 hover:via-gray-900 hover:to-black transform hover:scale-100 scale-95 transition-all duration-200"
             >
               <div className="w-[15%]">
                 <SearchuserImage userId={user.user_id} />
@@ -187,9 +185,9 @@ const SearchUsers = () => {
                       <Link to="/accept-group-list">
                         <button
                           disabled={Btnloading}
-                          className={`${
-                            Btnloading ? "opacity-20" : "opacity-100"
-                          } btn border-black border-2 text-white bg-gradient-to-b from-green-400 via-green-600 to-green-800`}
+                          className={`px-4 py-2 rounded font-medium border-2 border-black bg-gradient-to-b from-green-400 via-green-600 to-green-800 text-white transition-opacity ${
+                            Btnloading ? "opacity-30" : "opacity-100"
+                          }`}
                         >
                           Inviter
                         </button>
@@ -198,9 +196,9 @@ const SearchUsers = () => {
                       <button
                         disabled={Btnloading}
                         onClick={() => handleRemoveJoinFunction(user.user_id)}
-                        className={`${
-                          Btnloading ? "opacity-20" : "opacity-100"
-                        } btn border-black border-2 text-white bg-gradient-to-b from-red-400 via-red-600 to-red-800`}
+                        className={`px-4 py-2 rounded font-medium border-2 border-black bg-gradient-to-b from-red-400 via-red-600 to-red-800 text-white transition-opacity ${
+                          Btnloading ? "opacity-30" : "opacity-100"
+                        }`}
                       >
                         Remove
                       </button>
@@ -209,9 +207,9 @@ const SearchUsers = () => {
                     <button
                       disabled={Btnloading}
                       onClick={() => handleJoinFunction(user.user_id)}
-                      className={`${
-                        Btnloading ? "opacity-20" : "opacity-100"
-                      } btn border-black border-2 text-black bg-gradient-to-b from-yellow-400 via-yellow-600 to-yellow-800`}
+                      className={`px-4 py-2 rounded font-medium border-2 border-black bg-gradient-to-b from-yellow-400 via-yellow-600 to-yellow-800 text-black transition-opacity ${
+                        Btnloading ? "opacity-30" : "opacity-100"
+                      }`}
                     >
                       Join
                     </button>
@@ -221,7 +219,7 @@ const SearchUsers = () => {
             </div>
           ))
         ) : (
-          <p>No users found.</p>
+          <p className="text-center text-gray-400">No users found.</p>
         )}
       </div>
     </div>
