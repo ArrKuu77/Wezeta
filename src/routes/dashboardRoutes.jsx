@@ -6,12 +6,12 @@ import UserInviters from "../pages/dashboardPage/userInviters/UserInviters";
 import SavingGroupDetailLayout from "../pages/dashboardPage/savingGroup/SavingGroupDetailLayout";
 import saveingGroupDetailRoutes from "./saveingGroupDetailRoute";
 import AcceptGroupList from "../pages/dashboardPage/savingGroup/AcceptGroupList";
-import PublicCreateGroup from "../pages/dashboardPage/publicCreateGroup/publicCreateGroup";
 import PublicGroupList from "../pages/dashboardPage/publicGroupList/PublicGroupList";
 import PublicGroupNoteLayout from "../pages/dashboardPage/publicGroupNoteDetail/PublicGroupNoteLayout";
 import publicSavingGroupDetailRoute from "./publicSavingGroupDetailRoute";
 import PublicGroupEdit from "../pages/dashboardPage/publicGroupNoteDetail/PublicGroupEdit";
 import Testpdf from "../pages/dashboardPage/publicGroupNoteDetail/Testpdf";
+import PublicCreateGroup from "../pages/dashboardPage/publicCreateGroup/PublicCreateGroup";
 const publicRoute = [
   {
     index: "/",
