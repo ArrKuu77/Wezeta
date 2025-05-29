@@ -27,7 +27,7 @@ const PublicCreateGroupState = ({ groupName, setStep, addUserList }) => {
       .single();
     if (res.data) {
       setLoading(false);
-      nav("/");
+      nav("/public-group-list");
     } else {
       alert("error:", res.error);
       setLoading(false);

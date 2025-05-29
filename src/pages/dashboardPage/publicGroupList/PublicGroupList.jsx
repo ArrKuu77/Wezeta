@@ -183,7 +183,7 @@ const GroupList = () => {
           </span>
         </div>
       ) : groupList.length > 0 ? (
-        groupList.map((group) => (
+        groupList.reverse().map((group) => (
           <div
             key={group.id}
             className="mb-8 p-6 rounded-xl bg-gray-900 text-yellow-300 shadow-lg border border-yellow-600"

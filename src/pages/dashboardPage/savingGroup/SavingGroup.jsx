@@ -251,14 +251,13 @@ const SavingGroup = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 min-h-screen">
-      <div className=" md:flex-row flex-col flex items-center md:justify-between ">
-        {/* Year Dropdown */}
-        <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text text-yellow-300">Filter by Year</span>
+      <div className="flex flex-col md:flex-row items-center md:justify-between gap-4">
+        <div className="w-full max-w-xs">
+          <label className="block mb-1 text-yellow-300 font-medium">
+            Filter by Year
           </label>
           <select
-            className="select select-bordered bg-black text-yellow-300"
+            className="w-full bg-black text-yellow-300 border border-yellow-500 rounded px-3 py-2"
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
           >
@@ -269,13 +268,12 @@ const SavingGroup = () => {
             ))}
           </select>
         </div>
-        {/* Month Dropdown */}
-        <div className="form-control w-full max-w-xs">
-          <label className="label">
-            <span className="label-text text-yellow-300">Filter by Month</span>
+        <div className="w-full max-w-xs">
+          <label className="block mb-1 text-yellow-300 font-medium">
+            Filter by Month
           </label>
           <select
-            className="select select-bordered bg-black text-yellow-300"
+            className="w-full bg-black text-yellow-300 border border-yellow-500 rounded px-3 py-2"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
           >
@@ -288,21 +286,17 @@ const SavingGroup = () => {
 
       {groupData ? (
         <>
-          <h1 className="text-3xl flex justify-center gap-3 items-center font-bold text-center">
+          <h1 className="text-3xl font-bold text-center flex items-center justify-center gap-3">
             <LuCalendarCog /> Group Report - {groupData.group_month}
           </h1>
 
-          {/* Filters */}
-          <div className="flex flex-col items-center md:flex-row md:justify-between gap-4 flex-wrap">
-            {/* User Filter */}
-            <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text text-yellow-300">
-                  Filter by Member
-                </span>
+          <div className="flex flex-col md:flex-row flex-wrap gap-4 justify-between items-center">
+            <div className="w-full max-w-xs">
+              <label className="block mb-1 text-yellow-300 font-medium">
+                Filter by Member
               </label>
               <select
-                className="select select-bordered bg-black text-yellow-300"
+                className="w-full bg-black text-yellow-300 border border-yellow-500 rounded px-3 py-2"
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
               >
@@ -319,7 +313,6 @@ const SavingGroup = () => {
                     (item) =>
                       item.group_detail_create_outCome_list.UploadUser_id === id
                   )?.group_detail_create_outCome_list.UploadUserName;
-
                   return (
                     <option key={id} value={id}>
                       {name}
@@ -329,15 +322,12 @@ const SavingGroup = () => {
               </select>
             </div>
 
-            {/* Category Filter */}
-            <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text text-yellow-300">
-                  Filter by Category
-                </span>
+            <div className="w-full max-w-xs">
+              <label className="block mb-1 text-yellow-300 font-medium">
+                Filter by Category
               </label>
               <select
-                className="select select-bordered bg-black text-yellow-300"
+                className="w-full bg-black text-yellow-300 border border-yellow-500 rounded px-3 py-2"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
@@ -356,15 +346,12 @@ const SavingGroup = () => {
               </select>
             </div>
 
-            {/* Date Filter */}
-            <div className="form-control w-full max-w-xs">
-              <label className="label">
-                <span className="label-text text-yellow-300">
-                  Filter by Date
-                </span>
+            <div className="w-full max-w-xs">
+              <label className="block mb-1 text-yellow-300 font-medium">
+                Filter by Date
               </label>
               <select
-                className="select select-bordered bg-black text-yellow-300"
+                className="w-full bg-black text-yellow-300 border border-yellow-500 rounded px-3 py-2"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
               >
@@ -385,154 +372,143 @@ const SavingGroup = () => {
             </div>
           </div>
 
-          {/* Income + Balances */}
-          <div className="card bg-neutral text-yellow-300 shadow-md">
-            <div className="card-body">
-              <h2 className="card-title">💰 Member Balances</h2>
-              <ul className="divide-y divide-gray-700">
-                {groupData.group_member_income_data.map((member) => {
-                  const income = parseInt(member.member_income);
-                  const outcome = memberExpenses[member.member_id] || 0;
-                  const balance = income - outcome;
-                  return (
-                    <li
-                      key={member.member_id}
-                      className="flex justify-between md:flex-row flex-col py-2"
-                    >
-                      <div>
-                        <div>
-                          <span className="font-bold">
-                            {member.member_name}
-                          </span>
-                          {member.member_id === session.user.id && (
-                            <div className="flex gap-2 mt-1">
-                              <button
-                                onClick={() => handleOpenModal("add")}
-                                className="px-1 py-0.5 md:px-3 md:py-1 bg-green-700 hover:bg-green-600 rounded text-white text-sm"
-                              >
-                                Add Income
-                              </button>
-                              <button
-                                onClick={() => handleOpenModal("minus")}
-                                className="px-1 py-0.5 md:px-3 md:py-1 bg-red-700 hover:bg-red-600 rounded text-white text-sm"
-                              >
-                                Minus Income
-                              </button>
-                            </div>
-                          )}
+          <div className="bg-neutral text-yellow-300 p-4 rounded shadow">
+            <h2 className="text-xl font-semibold mb-3">💰 Member Balances</h2>
+            <ul className="divide-y divide-gray-700">
+              {groupData.group_member_income_data.map((member) => {
+                const income = parseInt(member.member_income);
+                const outcome = memberExpenses[member.member_id] || 0;
+                const balance = income - outcome;
+                return (
+                  <li
+                    key={member.member_id}
+                    className="py-2 flex flex-col md:flex-row justify-between"
+                  >
+                    <div>
+                      <div className="font-bold">{member.member_name}</div>
+                      {member.member_id === session.user.id && (
+                        <div className="flex gap-2 mt-1">
+                          <button
+                            onClick={() => handleOpenModal("add")}
+                            className="bg-green-700 hover:bg-green-600 text-white rounded px-3 py-1 text-sm"
+                          >
+                            Add Income
+                          </button>
+                          <button
+                            onClick={() => handleOpenModal("minus")}
+                            className="bg-red-700 hover:bg-red-600 text-white rounded px-3 py-1 text-sm"
+                          >
+                            Minus Income
+                          </button>
                         </div>
-                        <div className="text-sm opacity-80 flex md:flex-row flex-col gap-0.5 mt-1">
-                          <span> Income: {income.toLocaleString()} MMK | </span>
-                          <span>Expenses: {outcome.toLocaleString()} MMK</span>
-                        </div>
+                      )}
+                      <div className="text-sm mt-1 opacity-80">
+                        Income: {income.toLocaleString()} MMK | Expenses:{" "}
+                        {outcome.toLocaleString()} MMK
                       </div>
-                      <span
-                        className={`font-bold md:flex md:items-end inline gap-0.5 md:gap-1 ${
-                          balance < 0 ? "text-red-400" : "text-green-400"
-                        }`}
-                      >
-                        <span>Balance :</span>
-                        <span>{balance.toLocaleString()} MMK</span>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+                    </div>
+                    <div
+                      className={`font-bold text-end mt-2 md:mt-0 ${
+                        balance < 0 ? "text-red-400" : "text-green-400"
+                      }`}
+                    >
+                      Balance: {balance.toLocaleString()} MMK
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
-          {/* Outcome Table */}
-          <div className="card bg-neutral text-yellow-300 shadow-md">
-            <div className="card-body">
-              <h2 className="card-title">🧾 Member Expenses</h2>
-              <div className="overflow-x-auto max-h-[400px]">
-                <table className="table text-sm">
-                  <thead className="sticky top-0 bg-neutral z-10">
+          <div className="bg-neutral text-yellow-300 p-4 rounded shadow">
+            <h2 className="text-xl font-semibold mb-3">🧾 Member Expenses</h2>
+            <div className="overflow-x-auto max-h-[400px]">
+              <table className="w-full text-sm text-yellow-300 border-separate border-spacing-y-1">
+                <thead className="sticky top-0 bg-neutral z-10 rounded-md">
+                  <tr className="bg-black rounded-md">
+                    <th className="text-center px-3 py-2">Name</th>
+                    <th className="text-center px-3 py-2">Category</th>
+                    <th className="text-center px-3 py-2">Shop</th>
+                    <th className="text-center px-3 py-2">Method</th>
+                    <th className="text-center px-3 py-2">Date & Time</th>
+                    <th className="text-end px-3 py-2">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOutcome.length > 0 ? (
+                    filteredOutcome
+                      .slice()
+                      .reverse()
+                      .map((item, i) => {
+                        const outcome = item.group_detail_create_outCome_list;
+                        return (
+                          <tr
+                            key={i}
+                            className="bg-neutral-800 hover:bg-neutral-700 transition-colors"
+                          >
+                            <td className="text-center px-3 py-2 font-medium">
+                              {outcome.UploadUserName}
+                            </td>
+                            <td className="text-center px-3 py-2">
+                              {outcome.category}
+                            </td>
+                            <td className="text-center px-3 py-2">
+                              {outcome.shopName}
+                            </td>
+                            <td className="text-center px-3 py-2">
+                              {outcome.paymentMethod}
+                            </td>
+                            <td className="text-center px-3 py-2">
+                              {outcome.create_DateOnly}{" "}
+                              {outcome.create_TimeOnly}
+                            </td>
+                            <td className="text-end px-3 py-2 font-semibold text-yellow-400">
+                              {parseInt(outcome.amount).toLocaleString()} MMK
+                            </td>
+                          </tr>
+                        );
+                      })
+                  ) : (
                     <tr>
-                      <th className=" text-center text-nowrap">Name</th>
-                      <th className=" text-center text-nowrap">Category</th>
-                      <th className=" text-center text-nowrap">Shop</th>
-                      <th className=" text-center">Method</th>
-                      <th className=" text-center">Date & Time</th>
-                      <th className=" text-end">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOutcome.length > 0 ? (
-                      filteredOutcome
-                        .slice()
-                        .reverse()
-                        .map((item, i) => {
-                          const outcome = item.group_detail_create_outCome_list;
-                          return (
-                            <tr className="hover:bg-neutral-900" key={i}>
-                              <td className="text-center text-nowrap">
-                                {outcome.UploadUserName}
-                              </td>
-                              <td className="text-center text-nowrap">
-                                {outcome.category}
-                              </td>
-                              <td className="text-center text-nowrap">
-                                {outcome.shopName}
-                              </td>
-                              <td className="text-center">
-                                {outcome.paymentMethod}
-                              </td>
-                              <td className="text-center">
-                                {outcome.create_DateOnly}{" "}
-                                {outcome.create_TimeOnly}
-                              </td>
-                              <td className="text-end">
-                                {parseInt(outcome.amount).toLocaleString()} MMK
-                              </td>
-                            </tr>
-                          );
-                        })
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="text-center text-red-400">
-                          No matching records.
-                        </td>
-                      </tr>
-                    )}
-                    <tr className="bg-black text-yellow-300 font-bold border-t border-yellow-500">
-                      <td colSpan="4" className="text-right pr-4 text-lg"></td>
-                      <td className="text-center pr-4 text-lg">Total</td>
-                      <td className="text-lg text-end">
-                        {totalFilteredOutcome.toLocaleString()} MMK
+                      <td colSpan="6" className="text-center text-red-400 py-4">
+                        No matching records.
                       </td>
                     </tr>
-                  </tbody>
-                </table>
-              </div>
+                  )}
+                  <tr className="bg-black text-yellow-300 font-bold border-t border-yellow-500">
+                    <td colSpan="4" className="text-right pr-4 text-lg"></td>
+                    <td className="text-center pr-4 text-lg">Total</td>
+                    <td className="text-lg text-end px-3 py-2">
+                      {totalFilteredOutcome.toLocaleString()} MMK
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Summary */}
-          <div className="card bg-neutral text-yellow-300 shadow-md">
-            <div className="card-body">
-              <h2 className="card-title">📊 Summary</h2>
-              <ul className="space-y-2">
-                <li>
-                  Total Income:{" "}
-                  <span className="font-semibold">
-                    {totalIncome.toLocaleString()} MMK
-                  </span>
-                </li>
-                <li>
-                  Total Outcome:{" "}
-                  <span className="font-semibold">
-                    {totalOutcome.toLocaleString()} MMK
-                  </span>
-                </li>
-                <li>
-                  Extra Money:{" "}
-                  <span className="font-semibold text-green-400">
-                    {groupData.extra_money.toLocaleString()} MMK
-                  </span>
-                </li>
-              </ul>
-            </div>
+          <div className="bg-neutral text-yellow-300 p-4 rounded shadow">
+            <h2 className="text-xl font-semibold mb-2">📊 Summary</h2>
+            <ul className="space-y-1">
+              <li>
+                Total Income:{" "}
+                <span className="font-semibold">
+                  {totalIncome.toLocaleString()} MMK
+                </span>
+              </li>
+              <li>
+                Total Outcome:{" "}
+                <span className="font-semibold">
+                  {totalOutcome.toLocaleString()} MMK
+                </span>
+              </li>
+              <li>
+                Extra Money:{" "}
+                <span className="font-semibold text-green-400">
+                  {groupData.extra_money.toLocaleString()} MMK
+                </span>
+              </li>
+            </ul>
           </div>
         </>
       ) : (
@@ -541,54 +517,53 @@ const SavingGroup = () => {
         </p>
       )}
 
-      {/* Income Modal */}
       {modalType && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-neutral p-6 rounded-xl w-full max-w-md text-yellow-300">
-            <div className=" mb-2 flex flex-col gap-3">
-              <span className=" text-lg font-bold ">
+            <div className="mb-4">
+              <p className="text-lg font-bold">
                 You are current income is{" "}
                 {parseInt(
                   groupData.group_member_income_data.find(
-                    (member) => member.member_id == session.user.id
+                    (m) => m.member_id === session.user.id
                   ).member_income
                 ).toLocaleString()}{" "}
                 MMK
-              </span>
-              <h2 className=" text-sm text-white font-semibold">
+              </p>
+              <p className="text-sm text-white font-semibold">
                 {modalType === "add" ? (
-                  <span className="text-green-400 flex  gap-1">
+                  <span className="text-green-400">
                     How much do you want to{" "}
-                    <p className="  text-yellow-500">plus</p> your income?
+                    <span className="text-yellow-500">plus</span> your income?
                   </span>
                 ) : (
-                  <span className="text-green-400  flex  gap-1">
+                  <span className="text-green-400">
                     How much do you want to{" "}
-                    <p className="  text-yellow-500">minus</p> your income?
+                    <span className="text-yellow-500">minus</span> your income?
                   </span>
                 )}
-              </h2>
+              </p>
             </div>
             <input
               type="number"
               placeholder="Enter amount"
-              className="input input-bordered w-full bg-black text-yellow-300"
+              className="w-full bg-black text-yellow-300 border border-yellow-500 px-3 py-2 rounded"
               value={incomeAmount}
               onChange={(e) => setIncomeAmount(e.target.value)}
             />
             <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={handleCloseModal}
-                className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
               >
                 Cancel
               </button>
               <button
-                disabled={loading}
                 onClick={handleSubmitIncome}
+                disabled={loading}
                 className="px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400"
               >
-                {loading ? "Submiting..." : "Submit"}
+                {loading ? "Submitting..." : "Submit"}
               </button>
             </div>
           </div>
