@@ -4,6 +4,7 @@ import AuthLableInput from "../../../components/authComponent/AuthLableInput";
 import { supabase } from "../../../../supabaseClient";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { RiArrowGoBackFill } from "react-icons/ri";
 
 const PublicCreateCategories = () => {
   const {
@@ -35,6 +36,14 @@ const PublicCreateCategories = () => {
   };
   return (
     <div className="bg-gray-900 p-6 rounded-2xl shadow-lg m-4">
+      <div>
+        <button
+          onClick={() => nav(-1)}
+          className=" flex gap-1 items-center md:px-2 px-1 py-1 md:text-md text-xl bg-amber-700 cursor-pointer border border-gray-600 text-white rounded-lg my-2"
+        >
+          <RiArrowGoBackFill />
+        </button>
+      </div>
       <form onSubmit={handleSubmit(handleUplodeFunction)} className="space-y-4">
         <AuthLableInput
           register={register}

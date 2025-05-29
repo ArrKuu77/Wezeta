@@ -14,13 +14,19 @@ const GroupList = () => {
   const [groupList, setGroupList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("all"); // all, creator, member
+  const userId = session.user.id;
 
   const fetchGroups = async () => {
     setLoading(true);
 
     const { data, error } = await supabase
       .from("public-saving-group-list-member")
-      .select("*");
+      .select("*")
+      .or(
+        `group_creater.eq.${userId},group_members.cs.[${JSON.stringify(
+          userId
+        )}]`
+      );
 
     if (error) {
       console.error("Error fetching group list:", error);
@@ -28,22 +34,18 @@ const GroupList = () => {
       return;
     }
 
-    const userId = session.user.id;
-
     // Get groups where the user is creator or member
-    const userGroups = data.filter(
-      (group) =>
-        group.group_creater === userId || group.group_members.includes(userId)
-    );
+    // const userGroups = data.filter(
+    //   (group) =>
+    //     group.group_creater === userId || group.group_members.includes(userId)
+    // );
 
     // Apply filter
-    let filteredGroups = userGroups;
+    let filteredGroups = data;
     if (filterType === "creator") {
-      filteredGroups = userGroups.filter(
-        (group) => group.group_creater === userId
-      );
+      filteredGroups = data.filter((group) => group.group_creater === userId);
     } else if (filterType === "member") {
-      filteredGroups = userGroups.filter(
+      filteredGroups = data.filter(
         (group) =>
           group.group_creater !== userId && group.group_members.includes(userId)
       );
