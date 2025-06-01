@@ -3,6 +3,9 @@ import { useAuth } from "../../../components/authComponent/context/AuthContext";
 import { supabase } from "../../../../supabaseClient";
 import { useLocation } from "react-router-dom";
 import { LuCalendarCog } from "react-icons/lu";
+import { MdDeleteForever } from "react-icons/md";
+import { MdAutoDelete } from "react-icons/md";
+import { VscLoading } from "react-icons/vsc";
 
 import toast from "react-hot-toast";
 
@@ -248,6 +251,49 @@ const SavingGroup = () => {
     handleCloseModal();
     setLoading(false);
   };
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const deleteRowData = async (outcome) => {
+    setLoadingDelete(true);
+
+    console.log("Delete row data clicked", outcome);
+    if (
+      outcome.group_detail_create_outCome_list.UploadUser_id !== session.user.id
+    ) {
+      toast.error("You can only delete your own expenses.");
+    } else {
+      const { error } = await supabase
+        .from("group_detail_create_outCome")
+        .delete()
+        .eq("id", outcome.id);
+
+      if (error) {
+        console.error("Error deleting row:", error);
+        toast.error("Failed to delete outcome");
+      } else {
+        await supabase
+          .from("group_detail_create")
+          .update({
+            extra_money:
+              groupData.extra_money +
+              parseInt(outcome.group_detail_create_outCome_list.amount),
+          })
+          .eq("id", outcome.group_detail_create_id);
+        await supabase
+          .from("saving-money-for-month")
+          .update({
+            group_saving:
+              groupData.extra_money +
+              parseInt(outcome.group_detail_create_outCome_list.amount),
+          })
+          .eq("group_id", location.state.group_id)
+          .eq("group_month", selectedMonth)
+          .eq("group_year", selectedYear);
+
+        toast.success("Outcome deleted successfully");
+      }
+    }
+    setLoadingDelete(false);
+  };
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 min-h-screen">
@@ -426,6 +472,8 @@ const SavingGroup = () => {
               <table className="w-full text-sm text-yellow-300 border-separate border-spacing-y-1">
                 <thead className="sticky top-0 bg-neutral z-10 rounded-md">
                   <tr className="bg-black rounded-md">
+                    <th className="text-end px-3 py-2">Delete</th>
+
                     <th className="text-center px-3 py-2">Name</th>
                     <th className="text-center px-3 py-2">Category</th>
                     <th className="text-center px-3 py-2">Shop</th>
@@ -446,6 +494,20 @@ const SavingGroup = () => {
                             key={i}
                             className="bg-neutral-800 hover:bg-neutral-700 transition-colors"
                           >
+                            {loadingDelete ? (
+                              <td className=" relative  font-semibold text-red-400">
+                                <VscLoading className=" text-4xl animate-spin mx-auto  text-red-500" />
+                                <MdAutoDelete className=" absolute animate-pulse top-[40%] left-[42%] " />
+                              </td>
+                            ) : (
+                              <td className="  font-semibold text-red-400">
+                                <MdDeleteForever
+                                  onClick={deleteRowData.bind(null, item)}
+                                  className="mx-auto text-lg cursor-pointer"
+                                />
+                              </td>
+                            )}
+
                             <td className="text-center px-3 py-2 font-medium">
                               {outcome.UploadUserName}
                             </td>
@@ -476,7 +538,7 @@ const SavingGroup = () => {
                     </tr>
                   )}
                   <tr className="bg-black text-yellow-300 font-bold border-t border-yellow-500">
-                    <td colSpan="4" className="text-right pr-4 text-lg"></td>
+                    <td colSpan="5" className="text-right pr-4 text-lg"></td>
                     <td className="text-center pr-4 text-lg">Total</td>
                     <td className="text-lg text-end px-3 py-2">
                       {totalFilteredOutcome.toLocaleString()} MMK

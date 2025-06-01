@@ -39,7 +39,7 @@ const AuthLableInput = ({
           errors?.[Name]
             ? "focus:border-red-500 focus:ring-red-500 border-red-500 "
             : "focus:ring-green-300 focus:border-green-300 border-slate-300  "
-        } disabled:opacity-75  border  text-white text-sm rounded-lg  block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400  dark:focus:ring-blue-500 dark:focus:border-blue-500`}
+        } disabled:opacity-75  border  text-white text-sm rounded-lg  block w-full p-2.5 bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400  dark:focus:ring-blue-500 dark:focus:border-blue-500`}
         placeholder={lableText.charAt(0).toLowerCase() + lableText.slice(1)}
       />
       {errors?.[Name]?.type === "required" && (

@@ -5,7 +5,9 @@ import { useAuth } from "../../../components/authComponent/context/AuthContext";
 import { LuCalendarCog } from "react-icons/lu";
 import { supabase } from "../../../../supabaseClient";
 import { v4 as uuidv4 } from "uuid";
-
+import { MdDeleteForever } from "react-icons/md";
+import { MdAutoDelete } from "react-icons/md";
+import { VscLoading } from "react-icons/vsc";
 const PublicSavingGroup = () => {
   const { session } = useAuth();
   const location = useLocation();
@@ -242,6 +244,30 @@ const PublicSavingGroup = () => {
       });
     }
   };
+
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const deleteRowData = async (outcome) => {
+    setLoadingDelete(true);
+    console.log("Delete row data clicked", outcome);
+    if (
+      outcome.group_detail_create_outCome_list.UploadUser_id !== session.user.id
+    ) {
+      toast.error("You can only delete your own outcomes.");
+    } else {
+      const { error } = await supabase
+        .from("public_group_detail_create_outCome")
+        .delete()
+        .eq("id", outcome.id);
+
+      if (error) {
+        console.error("Error deleting row:", error);
+        toast.error("Failed to delete outcome");
+      } else {
+        toast.success("Outcome deleted successfully");
+      }
+    }
+    setLoadingDelete(false);
+  };
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 min-h-screen">
       <div className="flex flex-col md:flex-row items-center md:justify-between gap-4">
@@ -435,6 +461,9 @@ const PublicSavingGroup = () => {
                 <thead className="sticky top-0 bg-gray-800 text-yellow-300 shadow-sm z-10">
                   <tr>
                     <th className=" text-start px-4 py-2 border-b border-yellow-500">
+                      Delete
+                    </th>
+                    <th className=" text-start px-4 py-2 border-b border-yellow-500">
                       Name
                     </th>
                     <th className="text-center px-4 py-2 border-b border-yellow-500">
@@ -466,6 +495,19 @@ const PublicSavingGroup = () => {
                             key={i}
                             className="hover:bg-gray-700 transition-colors duration-150"
                           >
+                            {loadingDelete ? (
+                              <td className=" relative  font-semibold text-red-400">
+                                <VscLoading className=" text-4xl animate-spin mx-auto  text-red-500" />
+                                <MdAutoDelete className=" absolute animate-pulse top-[40%] left-[42%] " />
+                              </td>
+                            ) : (
+                              <td className="  font-semibold text-red-400">
+                                <MdDeleteForever
+                                  onClick={deleteRowData.bind(null, item)}
+                                  className="mx-auto text-lg cursor-pointer"
+                                />
+                              </td>
+                            )}
                             <td className=" text-start whitespace-nowrap px-4 py-2">
                               {o.UploadUserName}
                             </td>
@@ -498,7 +540,7 @@ const PublicSavingGroup = () => {
                     </tr>
                   )}
                   <tr className="bg-gray-900 text-yellow-300 font-semibold border-t border-yellow-500">
-                    <td colSpan="4"></td>
+                    <td colSpan="5"></td>
                     <td className="text-center px-4 py-2">Total</td>
                     <td className="text-right px-4 py-2">
                       {totalFilteredOutcome.toLocaleString()} MMK
