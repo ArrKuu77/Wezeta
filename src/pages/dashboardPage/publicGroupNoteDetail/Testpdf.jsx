@@ -142,11 +142,11 @@ const Testpdf = () => {
                     </div>
                     <div className="flex flex-col items-center">
                       <div className="w-full border-t-2 border-black mb-1"></div>
-                      <p className="text-sm whitespace-nowrap">Claimed By</p>
+                      <p className="text-sm whitespace-nowrap">Checked By</p>
                     </div>
                     <div className="flex flex-col items-center">
                       <div className="w-full border-t-2 border-black mb-1"></div>
-                      <p className="text-sm whitespace-nowrap">Claimed By</p>
+                      <p className="text-sm whitespace-nowrap">Approved By</p>
                     </div>
                   </div>
                 </td>
