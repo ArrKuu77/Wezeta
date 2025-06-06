@@ -60,6 +60,9 @@ const Testpdf = () => {
         className="bg-white text-black rounded-lg shadow-md p-6 max-w-6xl mx-auto"
       >
         <h1 className="text-2xl font-bold text-center text-yellow-600 mb-1">
+          Advance Claimed Form
+        </h1>
+        <h1 className="text-md font-bold text-center text-yellow-600 mb-1">
           {groupName} - {months} Expend
         </h1>
         <p className="text-center text-sm text-gray-700 mb-6">
@@ -72,8 +75,10 @@ const Testpdf = () => {
             <thead className="bg-yellow-200 text-gray-800 font-semibold">
               <tr>
                 <th className="border px-4 py-2 text-left">#</th>
-                <th className="border px-4 py-2 text-left">Customer</th>
-                <th className="border px-4 py-2 text-left">Category</th>
+                <th className="border px-4 py-2 text-left">KOLName</th>
+                <th className="border px-4 py-2 text-left">
+                  Title and Purpose
+                </th>
                 <th className="border px-4 py-2 text-right">Amount (MMK)</th>
               </tr>
             </thead>
@@ -121,10 +126,29 @@ const Testpdf = () => {
                 }`}
               >
                 <td colSpan={3} className="border px-4 py-2 text-center">
-                  Refare {balance > 0 ? "to" : "from"} company
+                  Refund {balance > 0 ? "to" : "from"} company
                 </td>
                 <td className="border px-4 py-2 text-right">
                   {Math.abs(balance).toLocaleString()}
+                </td>
+              </tr>
+              {/* Signature Row inside table */}
+              <tr>
+                <td colSpan={4} className="pt-16 pb-8">
+                  <div className="w-full grid grid-cols-3 gap-14">
+                    <div className="flex flex-col items-center">
+                      <div className="w-full border-t-2 border-black mb-1"></div>
+                      <p className="text-sm whitespace-nowrap">Claimed By</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-full border-t-2 border-black mb-1"></div>
+                      <p className="text-sm whitespace-nowrap">Claimed By</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-full border-t-2 border-black mb-1"></div>
+                      <p className="text-sm whitespace-nowrap">Claimed By</p>
+                    </div>
+                  </div>
                 </td>
               </tr>
             </tbody>

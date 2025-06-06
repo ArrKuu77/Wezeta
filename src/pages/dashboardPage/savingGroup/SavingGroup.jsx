@@ -475,10 +475,10 @@ const SavingGroup = () => {
                     <th className="text-end px-3 py-2">Delete</th>
 
                     <th className="text-center px-3 py-2">Name</th>
-                    <th className="text-center px-3 py-2">Category</th>
-                    <th className="text-center px-3 py-2">Shop</th>
                     <th className="text-center px-3 py-2">Method</th>
                     <th className="text-center px-3 py-2">Date & Time</th>
+                    <th className="text-center px-3 py-2">Shop</th>
+                    <th className="text-center px-3 py-2">Category</th>
                     <th className="text-end px-3 py-2">Amount</th>
                   </tr>
                 </thead>
@@ -492,7 +492,10 @@ const SavingGroup = () => {
                         return (
                           <tr
                             key={i}
-                            className="bg-neutral-800 hover:bg-neutral-700 transition-colors"
+                            className={`${
+                              session.user.id == outcome.UploadUser_id &&
+                              "bg-slate-800 hover:bg-slate-700"
+                            } bg-neutral-800 hover:bg-neutral-700 transition-colors`}
                           >
                             {loadingDelete ? (
                               <td className=" relative  font-semibold text-red-400">
@@ -508,14 +511,8 @@ const SavingGroup = () => {
                               </td>
                             )}
 
-                            <td className="text-center px-3 py-2 font-medium">
+                            <td className="text-center text-nowrap px-3 py-2 font-medium">
                               {outcome.UploadUserName}
-                            </td>
-                            <td className="text-center px-3 py-2">
-                              {outcome.category}
-                            </td>
-                            <td className="text-center px-3 py-2">
-                              {outcome.shopName}
                             </td>
                             <td className="text-center px-3 py-2">
                               {outcome.paymentMethod}
@@ -523,6 +520,12 @@ const SavingGroup = () => {
                             <td className="text-center px-3 py-2">
                               {outcome.create_DateOnly}{" "}
                               {outcome.create_TimeOnly}
+                            </td>
+                            <td className="text-center px-3 py-2">
+                              {outcome.shopName}
+                            </td>
+                            <td className="text-center px-3 py-2">
+                              {outcome.category}
                             </td>
                             <td className="text-end px-3 py-2 font-semibold text-yellow-400">
                               {parseInt(outcome.amount).toLocaleString()} MMK

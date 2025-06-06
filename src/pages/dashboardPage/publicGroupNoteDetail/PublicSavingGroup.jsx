@@ -493,7 +493,10 @@ const PublicSavingGroup = () => {
                         return (
                           <tr
                             key={i}
-                            className="hover:bg-gray-700 transition-colors duration-150"
+                            className={`${
+                              session.user.id == o.UploadUser_id &&
+                              "bg-gray-600 hover:bg-gray-700"
+                            } bg-neutral-800 hover:bg-neutral-700 transition-colors`}
                           >
                             {loadingDelete ? (
                               <td className=" relative  font-semibold text-red-400">
