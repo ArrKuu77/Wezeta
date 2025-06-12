@@ -22,6 +22,9 @@ const Home = () => {
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().toLocaleString("default", { month: "long" })
   );
+  const endYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(endYear);
+
   const [groupDetails, setGroupDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [useGroups, setUseGroups] = useState([]);
@@ -49,7 +52,8 @@ const Home = () => {
           "group_id",
           userGroups.map((group) => group.group_id)
         )
-        .eq("group_month", selectedMonth);
+        .eq("group_month", selectedMonth)
+        .eq("group_year", selectedYear);
 
       if (detailError) throw detailError;
       setUseGroups(userGroups);
@@ -65,7 +69,7 @@ const Home = () => {
     if (session?.user?.id) {
       fetchGroupDetails();
     }
-  }, [selectedMonth, session?.user?.id]);
+  }, [selectedMonth, session?.user?.id, selectedYear]);
 
   return (
     <div className="p-6 bg-gray-950 text-yellow-300">

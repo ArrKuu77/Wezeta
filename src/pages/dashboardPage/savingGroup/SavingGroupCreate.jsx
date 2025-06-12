@@ -55,6 +55,7 @@ const SavingGroupCreate = () => {
   const [select_category, setSelect_category] = useState("");
   const now = new Date();
   const monthName = now.toLocaleString("default", { month: "long" });
+  const endYear = new Date().getFullYear();
 
   useEffect(() => {
     const checkIncomeSubmitted = async () => {
@@ -63,6 +64,7 @@ const SavingGroupCreate = () => {
         .select("group_member_income_data")
         .eq("group_id", group.group_id)
         .eq("group_month", monthName)
+        .eq("group_year", endYear)
         .single();
 
       const alreadySubmitted = existingGroup?.group_member_income_data?.some(
@@ -100,6 +102,8 @@ const SavingGroupCreate = () => {
       .select("group_saving")
       .eq("group_id", group_id)
       .eq("group_month", prevMonthName)
+      .eq("group_year", endYear)
+
       .single();
 
     if (error) {
@@ -150,6 +154,7 @@ const SavingGroupCreate = () => {
         .select("*")
         .eq("group_id", group.group_id)
         .eq("group_month", monthName)
+        .eq("group_year", endYear)
         .single();
 
       const previousSaving = await getPreviousSaving(group.group_id);
@@ -194,7 +199,8 @@ const SavingGroupCreate = () => {
             group_saving: extraMoney,
           })
           .eq("group_id", group.group_id)
-          .eq("group_month", monthName);
+          .eq("group_month", monthName)
+          .eq("group_year", endYear);
       } else {
         const income = hasSubmittedIncome
           ? 0
@@ -207,6 +213,7 @@ const SavingGroupCreate = () => {
           {
             group_id: group.group_id,
             group_month: monthName,
+            group_year: endYear,
             group_member_outCome_data: [newUploadData],
             group_member_income_data: hasSubmittedIncome
               ? []
@@ -218,6 +225,7 @@ const SavingGroupCreate = () => {
         await supabase.from("saving-money-for-month").insert([
           {
             group_id: group.group_id,
+            group_year: endYear,
             group_month: monthName,
             group_saving: extraMoney,
           },

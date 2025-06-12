@@ -1,12 +1,12 @@
-import React from "react";
+// import React from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { PiNotepadFill } from "react-icons/pi";
+// import { PiNotepadFill } from "react-icons/pi";
 import { FaNotesMedical } from "react-icons/fa6";
 
 const SavingGroupDetail = () => {
   const location = useLocation();
   const group = location.state;
-  // console.log("group", group);
+  console.log("group", group);
 
   return (
     <div className="   bg-gray-950  pt-4">

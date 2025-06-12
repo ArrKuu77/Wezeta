@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 const SavingGroup = () => {
   const { session } = useAuth();
   const location = useLocation();
+  const startYear = 2025;
+  const endYear = new Date().getFullYear();
 
   const [groupData, setGroupData] = useState(null);
   const [selectedUser, setSelectedUser] = useState("all");
@@ -17,9 +19,13 @@ const SavingGroup = () => {
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().toLocaleString("default", { month: "long" })
   );
-
   const [modalType, setModalType] = useState(null); // 'add' or 'minus'
   const [incomeAmount, setIncomeAmount] = useState("");
+
+  const [selectedYear, setSelectedYear] = useState(endYear);
+  const years = Array(endYear - startYear + 1)
+    .fill(0)
+    .map((_, i) => startYear + i);
 
   const months = [
     "January",
@@ -43,6 +49,7 @@ const SavingGroup = () => {
         .select("*")
         .eq("group_id", location.state.group_id)
         .eq("group_month", selectedMonth)
+        .eq("group_year", selectedYear)
         .single();
 
       if (error) {
@@ -70,7 +77,7 @@ const SavingGroup = () => {
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [location.state.group_id, selectedMonth]);
+  }, [location.state.group_id, selectedMonth, selectedYear]);
 
   const filteredOutcome =
     groupData?.group_member_outCome_data?.filter((item) => {
@@ -155,19 +162,39 @@ const SavingGroup = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 min-h-screen">
-      <div className="form-control mx-auto w-full max-w-xs">
-        <label className="label">
-          <span className="label-text text-yellow-300">Filter by Month</span>
-        </label>
-        <select
-          className="select select-bordered bg-black text-yellow-300"
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-        >
-          {months.map((month) => (
-            <option key={month}>{month}</option>
-          ))}
-        </select>
+      <div className=" md:flex-row flex-col flex items-center md:justify-between ">
+        {/* Year Dropdown */}
+        <div className="form-control w-full max-w-xs">
+          <label className="label">
+            <span className="label-text text-yellow-300">Filter by Year</span>
+          </label>
+          <select
+            className="select select-bordered bg-black text-yellow-300"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Month Dropdown */}
+        <div className="form-control w-full max-w-xs">
+          <label className="label">
+            <span className="label-text text-yellow-300">Filter by Month</span>
+          </label>
+          <select
+            className="select select-bordered bg-black text-yellow-300"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            {months.map((month) => (
+              <option key={month}>{month}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {groupData ? (
@@ -325,13 +352,12 @@ const SavingGroup = () => {
                 <table className="table text-sm">
                   <thead className="sticky top-0 bg-neutral z-10">
                     <tr>
-                      <th>Name</th>
-                      <th>Category</th>
-                      <th>Shop</th>
-                      <th>Method</th>
-                      <th>Date</th>
-                      <th>Time</th>
-                      <th>Amount</th>
+                      <th className=" text-center text-nowrap">Name</th>
+                      <th className=" text-center text-nowrap">Category</th>
+                      <th className=" text-center text-nowrap">Shop</th>
+                      <th className=" text-center">Method</th>
+                      <th className=" text-center">Date & Time</th>
+                      <th className=" text-end">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -340,30 +366,38 @@ const SavingGroup = () => {
                         .slice()
                         .reverse()
                         .map((item, i) => (
-                          <tr key={i}>
-                            <td>{item.UploadUserName}</td>
-                            <td>{item.category}</td>
-                            <td>{item.shopName}</td>
-                            <td>{item.paymentMethod}</td>
-                            <td>{item.create_DateOnly}</td>
-                            <td>{item.create_TimeOnly}</td>
-                            <td>
+                          <tr className=" hover:bg-neutral-900" key={i}>
+                            <td className=" text-center text-nowrap">
+                              {item.UploadUserName}
+                            </td>
+                            <td className=" text-center text-nowrap">
+                              {item.category}
+                            </td>
+                            <td className=" text-center text-nowrap">
+                              {item.shopName}
+                            </td>
+                            <td className=" text-center">
+                              {item.paymentMethod}
+                            </td>
+                            <td className=" text-center">
+                              {item.create_DateOnly} {item.create_TimeOnly}
+                            </td>
+                            <td className=" text-end">
                               {parseInt(item.amount).toLocaleString()} MMK
                             </td>
                           </tr>
                         ))
                     ) : (
                       <tr>
-                        <td colSpan="7" className="text-center text-red-400">
+                        <td colSpan="6" className="text-center text-red-400">
                           No matching records.
                         </td>
                       </tr>
                     )}
                     <tr className="bg-black text-yellow-300 font-bold border-t border-yellow-500">
-                      <td colSpan="6" className="text-right pr-4 text-lg">
-                        Total
-                      </td>
-                      <td className="text-lg">
+                      <td colSpan="4" className="text-right pr-4 text-lg"></td>
+                      <td className="text-center pr-4 text-lg">Total</td>
+                      <td className="text-lg text-end">
                         {totalFilteredOutcome.toLocaleString()} MMK
                       </td>
                     </tr>
