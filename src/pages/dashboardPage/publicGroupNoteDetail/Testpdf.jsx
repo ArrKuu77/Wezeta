@@ -31,7 +31,7 @@ const Testpdf = () => {
   const downloadPDF = () => {
     const opt = {
       margin: 0.5,
-      filename: `${groupName}_${months}_report.pdf`,
+      filename: `${groupName}_${months}_Expenses.pdf`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },

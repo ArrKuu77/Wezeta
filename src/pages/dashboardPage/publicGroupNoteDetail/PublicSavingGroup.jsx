@@ -268,6 +268,17 @@ const PublicSavingGroup = () => {
     }
     setLoadingDelete(false);
   };
+  const groupSummeryPdf = () => {
+    console.log("pdf");
+    nav(`/public-saving-group/export-summeryPDF`, {
+      state: {
+        incomeData: totalIncome,
+        outcomeData: filteredOutcome,
+        months: selectedMonth,
+        groupName: location.state.group_name,
+      },
+    });
+  };
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6 text-yellow-300 min-h-screen">
       <div className="flex flex-col md:flex-row items-center md:justify-between gap-4">
@@ -454,11 +465,11 @@ const PublicSavingGroup = () => {
           </div>
 
           {/* Outcome Table */}
-          <div className="bg-gray-800 rounded-lg p-6 mt-6">
+          <div className="bg-black rounded-lg p-6 mt-6">
             <h2 className="text-xl font-semibold mb-4">🧾 Member Expenses</h2>
             <div className="overflow-x-auto max-h-[400px]">
               <table className="w-full text-sm border-separate border-spacing-0">
-                <thead className="sticky top-0 bg-gray-800 text-yellow-300 shadow-sm z-10">
+                <thead className="sticky top-0 bg-black text-yellow-300 shadow-sm z-10">
                   <tr>
                     <th className=" text-start px-4 py-2 border-b border-yellow-500">
                       Delete
@@ -483,7 +494,7 @@ const PublicSavingGroup = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-black">
                   {filteredOutcome.length > 0 ? (
                     filteredOutcome
                       .slice()
@@ -495,7 +506,7 @@ const PublicSavingGroup = () => {
                             key={i}
                             className={`${
                               session.user.id == o.UploadUser_id &&
-                              "bg-gray-600 hover:bg-gray-700"
+                              "bg-slate-800 hover:bg-slate-700"
                             } bg-neutral-800 hover:bg-neutral-700 transition-colors`}
                           >
                             {loadingDelete ? (
@@ -542,7 +553,7 @@ const PublicSavingGroup = () => {
                       </td>
                     </tr>
                   )}
-                  <tr className="bg-gray-900 text-yellow-300 font-semibold border-t border-yellow-500">
+                  <tr className="bg-black text-yellow-300 font-semibold border-t border-yellow-500">
                     <td colSpan="5"></td>
                     <td className="text-center px-4 py-2">Total</td>
                     <td className="text-right px-4 py-2">
@@ -556,7 +567,18 @@ const PublicSavingGroup = () => {
 
           {/* Summary */}
           <div className="bg-gray-800 rounded-lg p-6 mt-6">
-            <h2 className="text-xl font-semibold mb-4">📊 Summary</h2>
+            <div className=" flex flex-col justify-between my-3">
+              {selectedUser == "all" && (
+                <button
+                  onClick={groupSummeryPdf}
+                  className="text-sm bg-yellow-600 hover:bg-yellow-500 text-black px-1 py-1 rounded font-semibold"
+                >
+                  Summary PDF
+                </button>
+              )}
+
+              <h2 className="text-xl font-semibold ">📊 Summary</h2>
+            </div>
             <ul className="space-y-2">
               <li>
                 Total Income:{" "}

@@ -360,7 +360,7 @@ const SavingGroupCreate = () => {
               <AuthLableInput
                 register={register}
                 errors={errors}
-                lableText="Shop Name"
+                lableText="Description"
                 inputType="text"
                 idLink="ShopName"
                 Name="ShopName"

@@ -12,6 +12,7 @@ import publicSavingGroupDetailRoute from "./publicSavingGroupDetailRoute";
 import PublicGroupEdit from "../pages/dashboardPage/publicGroupNoteDetail/PublicGroupEdit";
 import Testpdf from "../pages/dashboardPage/publicGroupNoteDetail/Testpdf";
 import PublicCreateGroup from "../pages/dashboardPage/publicCreateGroup/PublicCreateGroup";
+import SummeryPdf from "../pages/dashboardPage/publicGroupNoteDetail/summeryPdf";
 const publicRoute = [
   {
     index: "/",
@@ -49,6 +50,10 @@ const publicRoute = [
   {
     path: "/public-saving-group/export-userPDF",
     element: <Testpdf />,
+  },
+  {
+    path: "/public-saving-group/export-summeryPDF",
+    element: <SummeryPdf />,
   },
   {
     path: "/public-saving-group/public-saving-detail",
