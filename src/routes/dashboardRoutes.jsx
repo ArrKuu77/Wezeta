@@ -12,7 +12,7 @@ import publicSavingGroupDetailRoute from "./publicSavingGroupDetailRoute";
 import PublicGroupEdit from "../pages/dashboardPage/publicGroupNoteDetail/PublicGroupEdit";
 import Testpdf from "../pages/dashboardPage/publicGroupNoteDetail/Testpdf";
 import PublicCreateGroup from "../pages/dashboardPage/publicCreateGroup/PublicCreateGroup";
-import SummeryPdf from "../pages/dashboardPage/publicGroupNoteDetail/summeryPdf";
+import SummeryPdf from "../pages/dashboardPage/publicGroupNoteDetail/SummeryPdf";
 const publicRoute = [
   {
     index: "/",
