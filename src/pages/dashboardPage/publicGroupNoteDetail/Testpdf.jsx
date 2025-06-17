@@ -72,7 +72,7 @@ const Testpdf = () => {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm border border-gray-300">
-            <thead className="bg-yellow-200 text-gray-800 font-semibold">
+            <thead className=" text-gray-800 font-semibold">
               <tr>
                 <th className="border px-4 py-2 text-left">#</th>
                 <th className="border px-4 py-2 text-left">KOLName</th>
@@ -100,7 +100,7 @@ const Testpdf = () => {
               })}
 
               {/* Total Row */}
-              <tr className="bg-gray-100 font-medium">
+              <tr className=" font-medium">
                 <td colSpan={3} className="border px-4 py-2 text-center">
                   Total
                 </td>
@@ -110,7 +110,7 @@ const Testpdf = () => {
               </tr>
 
               {/* Advance Row */}
-              <tr className="bg-blue-100 font-medium">
+              <tr className=" font-medium">
                 <td colSpan={3} className="border px-4 py-2 text-center">
                   Advance
                 </td>
@@ -120,11 +120,7 @@ const Testpdf = () => {
               </tr>
 
               {/* Balance Row */}
-              <tr
-                className={`font-semibold ${
-                  balance > 0 ? "bg-green-100" : "bg-red-100"
-                }`}
-              >
+              <tr className={`font-semibold `}>
                 <td colSpan={3} className="border px-4 py-2 text-center">
                   Refund {balance > 0 ? "to" : "from"} company
                 </td>

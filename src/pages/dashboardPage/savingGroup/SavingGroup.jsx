@@ -477,7 +477,7 @@ const SavingGroup = () => {
                     <th className="text-center px-3 py-2">Name</th>
                     <th className="text-center px-3 py-2">Method</th>
                     <th className="text-center px-3 py-2">Date & Time</th>
-                    <th className="text-center px-3 py-2">Shop</th>
+                    <th className="text-center px-3 py-2">Description</th>
                     <th className="text-center px-3 py-2">Category</th>
                     <th className="text-end px-3 py-2">Amount</th>
                   </tr>

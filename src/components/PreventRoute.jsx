@@ -11,7 +11,7 @@ const PreventRoute = ({ children }) => {
 
   // If logged in, block access to route and go home
   if (!session) {
-    return <Navigate to="/signup" replace />;
+    return <Navigate to="/signin" replace />;
   }
 
   // Otherwise show the page (e.g. Signup)

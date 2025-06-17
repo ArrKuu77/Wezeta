@@ -103,7 +103,7 @@ const SummeryPdf = () => {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm border border-gray-300">
-            <thead className="bg-yellow-200 text-gray-800 font-semibold">
+            <thead className=" text-gray-800 font-semibold">
               <tr>
                 <th className="border px-4 py-2 text-center">#</th>
                 <th className="border px-4 py-2 text-left">MR Name</th>
@@ -126,7 +126,7 @@ const SummeryPdf = () => {
               })}
 
               {/* Total Outcome */}
-              <tr className="bg-gray-100 font-medium">
+              <tr className=" font-medium">
                 <td colSpan={2} className="border px-4 py-2 text-center">
                   Total
                 </td>
@@ -136,7 +136,7 @@ const SummeryPdf = () => {
               </tr>
 
               {/* Income (Advance) */}
-              <tr className="bg-blue-100 font-medium">
+              <tr className="text-blue-600 font-medium">
                 <td colSpan={2} className="border px-4 py-2 text-center">
                   Advance
                 </td>
@@ -148,7 +148,7 @@ const SummeryPdf = () => {
               {/* Refund */}
               <tr
                 className={`font-semibold ${
-                  refundAmount >= 0 ? "bg-green-100" : "bg-red-100"
+                  refundAmount >= 0 ? "text-green-500" : "text-red-500"
                 }`}
               >
                 <td colSpan={2} className="border px-4 py-2 text-center">
