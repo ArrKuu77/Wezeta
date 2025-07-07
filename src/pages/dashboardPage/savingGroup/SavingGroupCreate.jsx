@@ -15,6 +15,7 @@ import { GiHealthNormal } from "react-icons/gi";
 import { MdDirectionsCar } from "react-icons/md";
 import { IoIosBeer } from "react-icons/io";
 import { FcDonate } from "react-icons/fc";
+import LoadingImageComponent from "../../../components/lottiesComponent/LoadingImage.component";
 
 const SavingGroupCreate = () => {
   const categories = [
@@ -416,6 +417,17 @@ const SavingGroupCreate = () => {
           </div>
         )}
       </div>
+      {loading && (
+        <div className=" absolute top-0 right-0 w-full h-full bg-black/80 flex justify-center items-center   ">
+          <div className="  w-1/2   rounded-xl">
+            <LoadingImageComponent
+              loadingWeight={"w-full"}
+              loadingHeight={"h-full"}
+              area={true}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

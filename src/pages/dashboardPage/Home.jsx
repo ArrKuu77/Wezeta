@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { supabase } from "../../../supabaseClient";
 import { useAuth } from "../../components/authComponent/context/AuthContext";
 import {
@@ -28,7 +28,6 @@ const Home = () => {
   const [groupDetails, setGroupDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [useGroups, setUseGroups] = useState([]);
-  // console.log(groupDetails);
 
   const fetchGroupDetails = async () => {
     setLoading(true);
@@ -203,7 +202,33 @@ const Home = () => {
           })}
         </div>
       ) : (
-        <p className="text-red-400">No group data found for {selectedMonth}.</p>
+        <div>
+          {useGroups.length > 0 ? (
+            <div>
+              {useGroups.map((use, idx) => (
+                <Link
+                  key={idx}
+                  to={`/saving-group/saving-detail`}
+                  state={use.group_id}
+                >
+                  {use.user_join === session.user.id &&
+                  use.user_accept === session.user.id ? (
+                    <button className="cursor-pointer font-bold w-[90%] p-3 bg-yellow-500 text-black rounded-2xl border-2">
+                      Go Your private chart
+                    </button>
+                  ) : use.user_join === session.user.id ||
+                    use.user_accept === session.user.id ? (
+                    <button className="cursor-pointer font-bold w-[90%] p-3 bg-yellow-400 text-black rounded-2xl border-2">
+                      Go Your Group Chart
+                    </button>
+                  ) : null}
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-red-400">No group data found .</p>
+          )}
+        </div>
       )}
     </div>
   );

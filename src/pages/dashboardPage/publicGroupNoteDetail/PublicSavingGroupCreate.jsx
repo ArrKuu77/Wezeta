@@ -16,6 +16,8 @@ import { MdDirectionsCar } from "react-icons/md";
 import { IoIosBeer } from "react-icons/io";
 import { FcDonate } from "react-icons/fc";
 import { TbCategoryPlus } from "react-icons/tb";
+import Loading from "daisyui/components/loading";
+import LoadingImageComponent from "../../../components/lottiesComponent/LoadingImage.component";
 
 const PublicSavingGroupCreate = () => {
   const [categories, setCategories] = useState([]);
@@ -240,7 +242,7 @@ const PublicSavingGroupCreate = () => {
 
   return (
     <div className="p-4  flex items-center justify-center bg-gray-950">
-      <div className="w-full max-w-xl">
+      <div className="w-full  max-w-xl">
         {step > 1 ? (
           <button
             onClick={handleBack}
@@ -300,7 +302,7 @@ const PublicSavingGroupCreate = () => {
         )}
 
         {step === 2 && (
-          <div className="bg-gray-900 p-6 rounded-2xl shadow-lg">
+          <div className="bg-gray-900 p-6  rounded-2xl shadow-lg">
             <h2 className="text-2xl font-bold text-yellow-400 text-center mb-6">
               Add Transaction
             </h2>
@@ -392,6 +394,17 @@ const PublicSavingGroupCreate = () => {
           </div>
         )}
       </div>
+      {loading && (
+        <div className=" absolute top-0 right-0 w-full h-full bg-black/80 flex justify-center items-center   ">
+          <div className="  w-1/2   rounded-xl">
+            <LoadingImageComponent
+              loadingWeight={"w-full"}
+              loadingHeight={"h-full"}
+              area={true}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

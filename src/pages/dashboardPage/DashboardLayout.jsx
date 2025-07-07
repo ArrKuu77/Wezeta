@@ -11,7 +11,7 @@ const DashboardLayout = () => {
       </nav>
 
       {/* Main content */}
-      <main className="min-h-screen bg-gray-950 text-yellow-400">
+      <main className="min-h-screen relative bg-gray-950 text-yellow-400">
         <div className="w-11/12 mx-auto py-6">
           <Outlet />
         </div>
