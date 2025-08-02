@@ -14,6 +14,7 @@ const AcceptGroupList = () => {
   const [groupData, setGroupData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  console.log(groupData);
 
   const fetchGroups = async () => {
     try {

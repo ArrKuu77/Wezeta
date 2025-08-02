@@ -202,31 +202,36 @@ const Home = () => {
           })}
         </div>
       ) : (
-        <div>
+        <div className=" w-full px-4 py-6 sm:px-6 md:px-10 lg:px-16  text-yellow-400">
           {useGroups.length > 0 ? (
-            <div>
+            <div className="flex flex-col gap-6">
               {useGroups.map((use, idx) => (
-                <Link
+                <div
+                  className="bg-zinc-900 border border-yellow-600 rounded-2xl p-4 shadow-md w-full"
                   key={idx}
-                  to={`/saving-group/saving-detail`}
-                  state={use.group_id}
                 >
                   {use.user_join === session.user.id &&
                   use.user_accept === session.user.id ? (
-                    <button className="cursor-pointer font-bold w-[90%] p-3 bg-yellow-500 text-black rounded-2xl border-2">
-                      Go Your private chart
-                    </button>
+                    <Link to="/accept-group-list">
+                      <button className="w-full py-3 text-sm sm:text-base font-semibold rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 transition-all duration-300">
+                        ✅ Accept Group Lists
+                      </button>
+                    </Link>
                   ) : use.user_join === session.user.id ||
                     use.user_accept === session.user.id ? (
-                    <button className="cursor-pointer font-bold w-[90%] p-3 bg-yellow-400 text-black rounded-2xl border-2">
-                      Go Your Group Chart
-                    </button>
+                    <Link to="/public-group-list">
+                      <button className="w-full py-3 text-sm sm:text-base font-semibold rounded-xl bg-yellow-500 text-black hover:bg-yellow-400 transition-all duration-300">
+                        💼 Company Expense Group Lists
+                      </button>
+                    </Link>
                   ) : null}
-                </Link>
+                </div>
               ))}
             </div>
           ) : (
-            <p className="text-red-400">No group data found .</p>
+            <div className="text-center mt-10">
+              <p className="text-red-400 text-lg">🚫 No group data found.</p>
+            </div>
           )}
         </div>
       )}

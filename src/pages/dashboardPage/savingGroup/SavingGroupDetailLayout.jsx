@@ -6,7 +6,7 @@ import { FaNotesMedical } from "react-icons/fa6";
 const SavingGroupDetail = () => {
   const location = useLocation();
   const group = location.state;
-  // console.log("group", group);
+  console.log("group", group);
 
   return (
     <div className="   bg-gray-950  pt-4">
