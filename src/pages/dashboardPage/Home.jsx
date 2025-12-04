@@ -14,6 +14,7 @@ import {
   Legend,
 } from "recharts";
 import { Link } from "react-router-dom";
+import PageLoadingComponent from "../../components/lottiesComponent/PageLoading.component";
 
 const COLORS = ["#facc15", "#f87171", "#4ade80"]; // yellow, red, green
 
@@ -71,6 +72,7 @@ const Home = () => {
       fetchGroupDetails();
     }
   }, [selectedMonth, session?.user?.id, selectedYear]);
+  console.log(groupDetails);
 
   return (
     <div className="p-6 bg-gray-950 text-yellow-300">
@@ -87,7 +89,15 @@ const Home = () => {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <div className=" absolute top-0 right-0 w-full h-full bg-black/90 flex justify-center items-center   ">
+          <div className="  w-1/2   rounded-xl">
+            <PageLoadingComponent
+              loadingWeight={"w-full"}
+              loadingHeight={"h-full"}
+              area={true}
+            />
+          </div>
+        </div>
       ) : groupDetails.length > 0 ? (
         <div className="space-y-10 ">
           {groupDetails.map((detail) => {
@@ -95,11 +105,24 @@ const Home = () => {
               (sum, member) => sum + parseInt(member.member_income || 0),
               0
             );
-            const totalOutcome = totalIncome - detail.extra_money;
+
+            //
+
+            const totalExtra = detail.group_member_balance.reduce(
+              (sum, n) => sum + n.balance,
+              0
+            );
+            const isExtraPositive = totalExtra >= totalIncome;
             const pieData = [
               { name: "Income", value: totalIncome },
-              { name: "Outcome", value: totalOutcome },
-              { name: "Extra", value: detail.extra_money || 0 },
+              // { name: "Outcome", value: totalOutcome },
+              {
+                name: "Extra",
+                value: detail.group_member_balance.reduce(
+                  (sum, n) => sum + n.balance,
+                  0
+                ),
+              },
             ];
 
             return (
@@ -135,8 +158,14 @@ const Home = () => {
                         🧾 Total Outcome: {totalOutcome.toLocaleString()} MMK
                       </li> */}
                       <li>
-                        📦 Extra Money:{" "}
-                        {parseInt(detail.extra_money).toLocaleString()} MMK
+                        📦 Balance Money:{" "}
+                        {parseInt(
+                          detail.group_member_balance.reduce(
+                            (sum, n) => sum + n.balance,
+                            0
+                          )
+                        )}{" "}
+                        MMK
                       </li>
                     </ul>
                     <div>
@@ -167,10 +196,16 @@ const Home = () => {
                         outerRadius={80}
                         label
                       >
-                        {pieData.map((_, index) => (
+                        {pieData.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
+                            fill={
+                              entry.name === "Extra"
+                                ? isExtraPositive
+                                  ? "green" // Extra ≥ Income → GREEN
+                                  : "red" // Extra < Income → RED
+                                : "yellow" // default color for income
+                            }
                           />
                         ))}
                       </Pie>
