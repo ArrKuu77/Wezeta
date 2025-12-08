@@ -123,7 +123,8 @@ const SavingGroup = () => {
         const { data: fullData } = await supabase
           .from("group_detail_create_outCome")
           .select("*")
-          .eq("group_detail_create_id", data?.id);
+          .eq("group_detail_create_id", data?.id)
+          .order("id", { ascending: true });
         if (fullData) {
           setGroupData({ ...data, group_member_outCome_data: fullData });
         } else {
@@ -186,6 +187,7 @@ const SavingGroup = () => {
     return map;
   }, [groupData]);
   // console.log(memberExpensesMap);
+  console.log(groupData);
 
   const totalOutcome = useMemo(() => {
     return (groupData?.group_member_outCome_data || []).reduce((sum, row) => {

@@ -61,7 +61,8 @@ const PublicSavingGroup = () => {
         const { data: fullData } = await supabase
           .from("public_group_detail_create_outCome")
           .select("*")
-          .eq("group_detail_create_id", data?.id);
+          .eq("group_detail_create_id", data?.id)
+          .order("id", { ascending: true });
         if (fullData) {
           setGroupData({ ...data, group_member_outCome_data: fullData });
         } else {
