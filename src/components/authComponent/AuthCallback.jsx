@@ -9,24 +9,23 @@ const AuthCallback = () => {
   const { setSession } = useAuth();
 
   useEffect(() => {
-    const handleRedirect = async () => {
-      // Supabase handles OAuth tokens automatically and stores session
-      const { data, error } = await supabase.auth.getSession();
+    const handleOAuth = async () => {
+      // 🔥 REQUIRED for OAuth
+      const { data, error } = await supabase.auth.exchangeCodeForSession(
+        window.location.href
+      );
 
       if (error) {
-        console.error("Session fetch error:", error.message);
-        alert("Login failed. Try again.");
-        navigate("/login");
+        console.error("OAuth error:", error.message);
+        navigate("/login", { replace: true });
         return;
       }
 
-      if (data.session) {
-        setSession(data.session);
-        navigate("/"); // Go to home or dashboard
-      }
+      setSession(data.session);
+      navigate("/", { replace: true });
     };
 
-    handleRedirect();
+    handleOAuth();
   }, [navigate, setSession]);
 
   return (
