@@ -21,7 +21,7 @@ const AcceptGroupList = () => {
       setLoading(true);
 
       const { data: rawGroups, error: groupError } = await supabase
-        .from("create-group")
+        .from("create_group")
         .select("*")
         .or(`user_join.eq.${userId},user_accept.eq.${userId}`)
         .eq("exit_accept", true);
@@ -39,7 +39,7 @@ const AcceptGroupList = () => {
       ];
 
       const { data: users, error: userError } = await supabase
-        .from("user-data")
+        .from("user_data")
         .select("*")
         .in("user_id", userIds);
 
@@ -70,7 +70,7 @@ const AcceptGroupList = () => {
       .channel("realtime-accept-groups")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "create-group" },
+        { event: "*", schema: "public", table: "create_group" },
         (payload) => {
           const row = payload.new || payload.old;
           if (row?.user_join === userId || row?.user_accept === userId) {
@@ -90,7 +90,7 @@ const AcceptGroupList = () => {
 
   const handleConfirm = async () => {
     setShowConfirm(false);
-    const { error } = await supabase.from("create-group").insert({
+    const { error } = await supabase.from("create_group").insert({
       user_join: userId,
       user_accept: userId,
       exit_join: true,

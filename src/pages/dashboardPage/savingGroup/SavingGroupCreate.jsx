@@ -77,7 +77,7 @@ const SavingGroupCreate = () => {
 
     checkIncomeSubmitted();
   }, [group.group_id, session.user.id]);
-  console.log(hasSubmittedIncome);
+  // console.log(hasSubmittedIncome);
 
   const handleCategorySelect = (label) => {
     setValue("category", label);

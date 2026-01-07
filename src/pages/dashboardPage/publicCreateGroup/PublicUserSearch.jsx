@@ -29,7 +29,7 @@ const PublicUserSearch = ({
     const searchValue = `%${term}%`;
 
     const { data: users, error } = await supabase
-      .from("user-data")
+      .from("user_data")
       .select("*")
       .or(`user_name.ilike.${searchValue},user_email.ilike.${searchValue}`);
 

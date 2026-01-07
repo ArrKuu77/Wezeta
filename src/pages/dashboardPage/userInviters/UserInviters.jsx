@@ -15,7 +15,7 @@ const UserInviters = () => {
     setLoading(true);
 
     const { data, error } = await supabase
-      .from("create-group")
+      .from("create_group")
       .select("*")
       .eq("user_accept", session.user.id)
       .eq("exit_join", true);
@@ -27,7 +27,7 @@ const UserInviters = () => {
     }
 
     const { data: Inviter, error: InviterError } = await supabase
-      .from("user-data")
+      .from("user_data")
       .select("*")
       .in(
         "user_id",
@@ -54,7 +54,7 @@ const UserInviters = () => {
     const group_id = uuidv5(combinedString, MY_NAMESPACE);
 
     const { error, data } = await supabase
-      .from("create-group")
+      .from("create_group")
       .update({ exit_accept: true, group_id })
       .eq("user_accept", session.user.id)
       .eq("user_join", userJoinId)

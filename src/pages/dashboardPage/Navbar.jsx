@@ -67,7 +67,7 @@ const Navbar = () => {
                   />
                 ) : photo?.length > 0 ? (
                   <img
-                    src={`https://vjhmhyikyllvpirsjpen.supabase.co/storage/v1/object/public/user-photo/${session.user.id}/${photo[0]?.name}`}
+                    src={`https://bgvxqjymtdtvmbsqxtxk.supabase.co/storage/v1/object/public/user-photo/${session.user.id}/${photo[0]?.name}`}
                     alt="Stored Profile"
                   />
                 ) : (

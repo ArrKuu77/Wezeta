@@ -64,14 +64,14 @@ export const AuthContextProvider = ({ children }) => {
       const user = session.user;
 
       const { data: existingUser, error: fetchError } = await supabase
-        .from("user-data")
+        .from("user_data")
         .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
 
       if (!existingUser && !fetchError) {
         const { data: insertedUser, error: insertError } = await supabase
-          .from("user-data")
+          .from("user_data")
           .insert({
             user_name: user.user_metadata?.full_name,
             user_email: user.email,

@@ -22,7 +22,7 @@ const SearchUsers = () => {
     const searchValue = `%${term}%`;
 
     const { data: users, error } = await supabase
-      .from("user-data")
+      .from("user_data")
       .select("*")
       .or(`user_name.ilike.${searchValue},user_email.ilike.${searchValue}`);
 
@@ -32,9 +32,10 @@ const SearchUsers = () => {
       setBtnLoading(false);
       return;
     }
+    console.log("Search users:", users);
 
     const { data: groups, error: groupError } = await supabase
-      .from("create-group")
+      .from("create_group")
       .select("*")
       .or(`user_join.eq.${session.user.id},user_accept.eq.${session.user.id}`);
 
@@ -46,6 +47,7 @@ const SearchUsers = () => {
     }
 
     const filteredUsers = users.filter((u) => u.user_id !== session.user.id);
+    console.log("Filtered users:", filteredUsers);
     const merged = filteredUsers.map((user) => {
       const match = groups.find(
         (g) => g.user_accept === user.user_id || g.user_join === user.user_id
@@ -59,6 +61,7 @@ const SearchUsers = () => {
         user_accept: match?.user_accept ?? null,
       };
     });
+    console.log(merged);
 
     setResults(merged);
     setLoading(false);
@@ -68,7 +71,7 @@ const SearchUsers = () => {
   const handleJoinFunction = async (accept_userId) => {
     setBtnLoading(true);
     const { data, error } = await supabase
-      .from("create-group")
+      .from("create_group")
       .select("*")
       .eq("user_join", session.user.id)
       .eq("user_accept", accept_userId);
@@ -79,7 +82,7 @@ const SearchUsers = () => {
       await handleRemoveJoinFunction(accept_userId, true);
     } else {
       const { error: insertError } = await supabase
-        .from("create-group")
+        .from("create_group")
         .insert({
           user_join: session.user.id,
           exit_join: true,
@@ -99,7 +102,7 @@ const SearchUsers = () => {
   ) => {
     setBtnLoading(true);
     const { error } = await supabase
-      .from("create-group")
+      .from("create_group")
       .update({ exit_join: updateUserJoin })
       .eq("user_accept", accept_userId)
       .eq("user_join", session.user.id);
@@ -116,7 +119,7 @@ const SearchUsers = () => {
       .channel("realtime-group-updates")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "create-group" },
+        { event: "*", schema: "public", table: "create_group" },
         (payload) => {
           console.log("Realtime update received:", payload);
           handleSearch(); // Refresh search results

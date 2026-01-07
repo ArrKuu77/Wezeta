@@ -100,21 +100,21 @@ const ProfilePage = () => {
         // console.log(session.user.email);
         // console.log(refNameChange.current.value);
 
-        const { data: upData, error } = await supabase
-          .from("user-data")
-          .update({
-            user_name: refNameChange.current.value,
-          })
-          .eq("user_email", session.user.email.trim())
-          .select();
+        // const { data: upData, error } = await supabase
+        //   .from("user-data")
+        //   .update({
+        //     user_name: refNameChange.current.value,
+        //   })
+        //   .eq("user_email", session.user.email.trim())
+        //   .select();
 
-        if (!error) {
-          // console.log(upData);
-          setshowChangeName(false);
-          setLoading(false);
-        } else {
-          console.log(error);
-        }
+        // if (!error) {
+        //   // console.log(upData);
+        //   setshowChangeName(false);
+        //   setLoading(false);
+        // } else {
+        //   console.log(error);
+        // }
       } else {
         alert("Error updating false" + error);
         setshowChangeName(false);
@@ -178,7 +178,7 @@ const ProfilePage = () => {
             />
           ) : photo?.length > 0 ? (
             <img
-              src={`https://vjhmhyikyllvpirsjpen.supabase.co/storage/v1/object/public/user-photo/${session.user.id}/${photo[0]?.name}`}
+              src={`https://bgvxqjymtdtvmbsqxtxk.supabase.co/storage/v1/object/public/user-photo/${session.user.id}/${photo[0]?.name}`}
               alt="Profile"
               className="object-cover w-60 h-60 border-2 border-yellow-500 rounded-2xl shadow-lg"
             />

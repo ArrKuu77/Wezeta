@@ -62,7 +62,7 @@ const GroupList = () => {
     ];
 
     const { data: userData, error: userError } = await supabase
-      .from("user-data")
+      .from("user_data")
       .select("*")
       .in("user_id", allMemberIds);
 

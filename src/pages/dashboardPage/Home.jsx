@@ -34,7 +34,7 @@ const Home = () => {
     setLoading(true);
     try {
       const { data: userGroups, error: groupError } = await supabase
-        .from("create-group")
+        .from("create_group")
         .select("*")
         .or(`user_join.eq.${session.user.id},user_accept.eq.${session.user.id}`)
         .eq("exit_accept", true);
@@ -72,7 +72,7 @@ const Home = () => {
       fetchGroupDetails();
     }
   }, [selectedMonth, session?.user?.id, selectedYear]);
-  console.log(groupDetails);
+  // console.log(groupDetails);
 
   return (
     <div className="p-6 bg-gray-950 text-yellow-300">

@@ -28,7 +28,7 @@ const SearchuserImage = ({ userId, addDesign = null }) => {
     <div className="h-full w-full flex justify-center items-center">
       {photo?.length > 0 ? (
         <img
-          src={`https://vjhmhyikyllvpirsjpen.supabase.co/storage/v1/object/public/user-photo/${userId}/${photo[0]?.name}`}
+          src={`https://bgvxqjymtdtvmbsqxtxk.supabase.co/storage/v1/object/public/user-photo/${userId}/${photo[0]?.name}`}
           alt="Profile"
           className={`  overflow-hidden object-cover p-1   border border-yellow-500 ${
             addDesign ? addDesign : "w-full h-[85px] rounded-full"

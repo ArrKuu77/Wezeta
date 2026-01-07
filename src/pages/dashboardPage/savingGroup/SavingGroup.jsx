@@ -187,7 +187,7 @@ const SavingGroup = () => {
     return map;
   }, [groupData]);
   // console.log(memberExpensesMap);
-  console.log(groupData);
+  // console.log(groupData);
 
   const totalOutcome = useMemo(() => {
     return (groupData?.group_member_outCome_data || []).reduce((sum, row) => {
@@ -371,7 +371,7 @@ const SavingGroup = () => {
       const oldIncome = Number(members[index].member_income || 0);
 
       members[index].member_income = Math.max(0, oldIncome + changeAmount);
-      console.log(changeAmount);
+      // console.log(changeAmount);
 
       // =====================================================
       // 3) GET ALL OUTCOMES FOR THIS MONTH
@@ -390,7 +390,7 @@ const SavingGroup = () => {
 
       //     0
       //   );
-      // console.log(memberExpensesMap[session.user.id]);
+      console.log(memberExpensesMap[session.user.id]);
 
       // =====================================================
       // 4) GET PREVIOUS MONTH BALANCE (CARRY OVER)
@@ -412,19 +412,19 @@ const SavingGroup = () => {
       (prevRow?.group_member_balance || []).forEach((b) => {
         prevBalanceMap[b.member_id] = Number(b.balance || 0);
       });
-      console.log(prevBalanceMap);
+      // console.log(prevBalanceMap);
 
       // =====================================================
       // 5) BUILD NEW BALANCE ARRAY
       // =====================================================
       const newBalance = members.map((mem) => {
-        console.log(memberBalances);
+        // console.log(memberBalances);
 
         if (mem.member_id == session.user.id) {
           const income = Number(mem.member_income || 0);
           const outcome = memberExpensesMap[session.user.id];
           const prev = Number(prevBalanceMap[mem.member_id] || 0);
-          console.log(income, outcome, prev);
+          // console.log(income, outcome, prev);
 
           return {
             member_id: mem.member_id,
@@ -446,7 +446,7 @@ const SavingGroup = () => {
           };
         }
       });
-      console.log(newBalance);
+      // console.log(newBalance);
 
       // =====================================================
       // 6) UPDATE DATABASE
